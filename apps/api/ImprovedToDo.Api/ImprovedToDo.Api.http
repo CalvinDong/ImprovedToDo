@@ -1,0 +1,6 @@
+@ImprovedToDo.Api_HostAddress = http://localhost:5231
+
+GET {{ImprovedToDo.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
