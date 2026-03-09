@@ -11,8 +11,10 @@ builder.Services
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
         options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
     });
 
+builder.Services.AddRazorPages();
 builder.Services.AddAuthorization();
 
 builder.Services
@@ -22,6 +24,7 @@ builder.Services
     .AddValidation()
     .AddSwaggerDocs()
     .RegisterModules();
+
 
 
 
@@ -46,10 +49,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
+
+app.MapGet("/", () => "Server running");
 
 app.MapEndpoints();
 

@@ -27,31 +27,31 @@ public class AuthModule : IModule
         return Results.Ok("User created");
       });
 
-        endpoints.MapGet("/login", (HttpContext context) =>
-        {
-          var returnUrl = context.Request.Query["ReturnUrl"];
+      /*endpoints.MapGet("/login", (HttpContext context) =>
+      {
+        var returnUrl = context.Request.Query["ReturnUrl"];
 
-          var html = $"""
-          <html>
-              <body>
-                  <h2>Login</h2>
-                  <form method="post" action="/login">
-                      <input type="hidden" name="returnUrl" value="{returnUrl}" />
-                        
-                      <label>Username</label><br/>
-                      <input name="username" /><br/>
+        var html = $"""
+        <html>
+            <body>
+                <h2>Login</h2>
+                <form method="post" action="/login">
+                    <input type="hidden" name="returnUrl" value="{returnUrl}" />
+                      
+                    <label>Username</label><br/>
+                    <input name="username" /><br/>
 
-                      <label>Password</label><br/>
-                      <input name="password" type="password"/><br/><br/>
+                    <label>Password</label><br/>
+                    <input name="password" type="password"/><br/><br/>
 
-                      <button type="submit">Login</button>
-                  </form>
-              </body>
-          </html>
-          """;
+                    <button type="submit">Login</button>
+                </form>
+            </body>
+        </html>
+        """;
 
-          return Results.Content(html, "text/html");
-        });
+        return Results.Content(html, "text/html");
+      });
 
         endpoints.MapPost("/login", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
         {
@@ -78,7 +78,7 @@ public class AuthModule : IModule
             }
 
           return Results.Redirect(returnUrl);
-        });
+        });*/
 
         
         endpoints.MapMethods("/connect/authorize", new[] { "GET", "POST" }, async (IAuthService authService, HttpContext context) =>
