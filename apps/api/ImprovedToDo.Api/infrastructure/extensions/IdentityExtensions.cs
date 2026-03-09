@@ -7,13 +7,15 @@ public static class IdentityExtensions
   public static IServiceCollection AddIdentityServices(this IServiceCollection services)
   {
     services
-        .AddIdentityCore<ApplicationUser>(options =>
-        {
-          options.Password.RequireDigit = false;
-          options.Password.RequireUppercase = false;
-        })
-        .AddEntityFrameworkStores<AppDbContext>()
-        .AddSignInManager();
+      .AddIdentityCore<ApplicationUser>(options =>
+      {
+        options.Password.RequireDigit = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredLength = 8;
+        options.User.RequireUniqueEmail = true;
+      })
+      .AddEntityFrameworkStores<AppDbContext>()
+      .AddSignInManager();
 
     return services;
   }

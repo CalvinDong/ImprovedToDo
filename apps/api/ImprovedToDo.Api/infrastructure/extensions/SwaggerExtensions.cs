@@ -26,7 +26,8 @@ public static class SwaggerExtensions
             TokenUrl = new Uri("/connect/token", UriKind.Relative),
             Scopes = new Dictionary<string, string>
                     {
-                            { "api", "Access API" }
+                            { "api", "Access API" },
+                            { "offline_access", "Refresh token access" }
                     }
           }
         }
