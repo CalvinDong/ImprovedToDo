@@ -9,17 +9,18 @@ public static class OpenIddictExtensions
     .AddCore(options =>
     {
       options.UseEntityFrameworkCore()
-                 .UseDbContext<AppDbContext>();
+             .UseDbContext<AppDbContext>();
     })
 
     .AddServer(options =>
     {
       options.SetAuthorizationEndpointUris("/connect/authorize");
       options.SetTokenEndpointUris("/connect/token");
+      options.SetEndSessionEndpointUris("/connect/logout");
       // Need to configure logout
 
       options.AllowAuthorizationCodeFlow()
-                 .RequireProofKeyForCodeExchange();
+             .RequireProofKeyForCodeExchange();
       
       options.AllowRefreshTokenFlow();
 
@@ -32,13 +33,14 @@ public static class OpenIddictExtensions
                 OpenIddictConstants.Scopes.Profile,
                 OpenIddictConstants.Scopes.OfflineAccess,
                 "api"
-            );
+              );
 
       options.AddDevelopmentEncryptionCertificate()
-                 .AddDevelopmentSigningCertificate();
+             .AddDevelopmentSigningCertificate();
 
       options.UseAspNetCore()
-                 .EnableAuthorizationEndpointPassthrough();
+             .EnableAuthorizationEndpointPassthrough()
+             .EnableEndSessionEndpointPassthrough();
     })
 
     .AddValidation(options =>

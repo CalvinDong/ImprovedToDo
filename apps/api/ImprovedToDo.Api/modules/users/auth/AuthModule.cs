@@ -116,6 +116,26 @@ public class AuthModule : IModule
               _ => Results.Problem("Unexpected result.")
             };
           });
+        
+        endpoints.MapPost("/logout", async (HttpContext context) =>
+        {
+            await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+            return Results.Redirect("/");
+        });
+
+        endpoints.MapMethods("/connect/logout", new[] { "GET", "POST" }, async (HttpContext context) =>
+        {
+          var request = context.GetOpenIddictServerRequest();
+
+          await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+
+          if (!string.IsNullOrWhiteSpace(request?.PostLogoutRedirectUri))
+          {
+              return Results.Redirect(request.PostLogoutRedirectUri);
+          }
+
+          return Results.Redirect("/");
+        });
 
         endpoints.MapGet("/secure", async(HttpContext context) =>
         {
