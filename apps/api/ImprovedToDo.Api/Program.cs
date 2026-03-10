@@ -14,6 +14,7 @@ builder.Services
         options.LogoutPath = "/logout";
     });
 
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 builder.Services.AddRazorPages();
 builder.Services.AddAuthorization();
 

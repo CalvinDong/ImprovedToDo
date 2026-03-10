@@ -19,9 +19,14 @@ public class AuthService : IAuthService
     {
         var user = new ApplicationUser
         {
-            UserName = request.Email,
-            Email = request.Email
+            DisplayName = request.DisplayName,
+            Email = request.Email,
+            UserName = request.Email
         };
+        
+        if (string.IsNullOrEmpty(user.DisplayName)){
+            user.DisplayName = request.Email;
+        }
 
         return await _userManager.CreateAsync(user, request.Password);
     }
@@ -78,7 +83,8 @@ public class AuthService : IAuthService
         // Create the principal that OpenIddict will use to generate tokens/code.
         var principal = await _signInManager.CreateUserPrincipalAsync(user);
         
-        principal.SetClaim(OpenIddictConstants.Claims.Subject, await _userManager.GetUserIdAsync(user));
+        principal.SetClaim(OpenIddictConstants.Claims.Subject, user.Id);
+        principal.SetClaim(OpenIddictConstants.Claims.Name, user.DisplayName);
 
         // Copy the scopes requested by the client, e.g. "api".
         principal.SetScopes(request.GetScopes());
