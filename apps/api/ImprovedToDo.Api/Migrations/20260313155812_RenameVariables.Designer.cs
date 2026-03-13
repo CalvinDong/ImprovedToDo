@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ImprovedToDo.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260313155812_RenameVariables")]
+    partial class RenameVariables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -443,13 +446,7 @@ namespace ImprovedToDo.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Tags");
                 });
@@ -485,15 +482,9 @@ namespace ImprovedToDo.Api.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("TodoListId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("TodoItems");
                 });
@@ -526,13 +517,7 @@ namespace ImprovedToDo.Api.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("TodoLists");
                 });
@@ -641,17 +626,6 @@ namespace ImprovedToDo.Api.Migrations
                     b.Navigation("Authorization");
                 });
 
-            modelBuilder.Entity("Tag", b =>
-                {
-                    b.HasOne("ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TodoItem", b =>
                 {
                     b.HasOne("TodoList", "TodoList")
@@ -659,15 +633,7 @@ namespace ImprovedToDo.Api.Migrations
                         .HasForeignKey("TodoListId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("TodoList");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TodoItemTag", b =>
@@ -687,17 +653,6 @@ namespace ImprovedToDo.Api.Migrations
                     b.Navigation("Tag");
 
                     b.Navigation("TodoItem");
-                });
-
-            modelBuilder.Entity("TodoList", b =>
-                {
-                    b.HasOne("ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TodoSubItem", b =>

@@ -8,7 +8,7 @@ public static class ClaimsHelper
   {
       switch (claim.Type)
       {
-          //case Claims.Name:
+          case Claims.Name:
           case Claims.Email:
           case Claims.Role:
               yield return Destinations.AccessToken;

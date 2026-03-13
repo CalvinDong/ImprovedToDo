@@ -15,14 +15,14 @@ public class UserModule : IModule {
         // GET /todos
         group.MapGet("/", async (AppDbContext db) =>
         {
-            var todos = await db.Todos.ToListAsync();
+            var todos = await db.TodoItems.ToListAsync();
             return Results.Ok(todos);
         });
 
         // GET /todos/{id}
         group.MapGet("/{id:int}", async (int id, AppDbContext db) =>
         {
-            var todo = await db.Todos.FindAsync(id);
+            var todo = await db.TodoItems.FindAsync(id);
 
             if (todo == null)
                 return Results.NotFound();
