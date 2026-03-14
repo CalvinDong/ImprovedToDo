@@ -1,12 +1,29 @@
+using FluentValidation;
+
 namespace Api.Dtos.Tasks;
 
 public sealed class CreateTaskRequest
 {
     public string Title { get; set; } = "";
     public string? Description { get; set; }
-    public DateTime? DueDate { get; set; }
+    public DateTimeOffset? DueDate { get; set; }
     public Guid? TodoListId { get; set; }
     public int? Position { get; set; }
+}
+
+public class CreateTaskValidator : AbstractValidator<CreateTaskRequest>
+{
+    public CreateTaskValidator()
+    {
+        RuleFor(x => x.Title)
+            .NotEmpty()
+            .MaximumLength(200);
+        RuleFor(x => x.Description)
+            .MaximumLength(2000);
+        RuleFor(x => x.Position)
+            .GreaterThanOrEqualTo(0)
+            .When(x => x.Position.HasValue);
+    }
 }
 
 public sealed class UpdateTaskRequest
@@ -46,11 +63,11 @@ public sealed class TaskResponse
     public string Title { get; set; } = "";
     public string? Description { get; set; }
     public bool IsCompleted { get; set; }
-    public DateTime? DueDate { get; set; }
+    public DateTimeOffset? DueDate { get; set; }
     public Guid? TodoListId { get; set; }
     public int Position { get; set; }
-    public DateTime CreatedAtUtc { get; set; }
-    public DateTime? UpdatedAtUtc { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset? UpdatedAtUtc { get; set; }
 
     public static TaskResponse FromEntity(TodoItem task)
     {

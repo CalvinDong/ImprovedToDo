@@ -1,16 +1,25 @@
 using Api.Dtos.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-public class TasksRepo : ITaskService
+public class TaskService : ITaskService
 {
     private readonly AppDbContext _context;
 
-    public TasksRepo(AppDbContext context) 
+    public TaskService(AppDbContext context) 
     {
         _context = context;    
     }
 
     public async Task<TaskResponse> CreateTask(CreateTaskRequest request, string userId, CancellationToken ct)
     {
+        var todoList = await _context.TodoLists
+            .FirstOrDefaultAsync(x => x.Id == request.TodoListId && x.UserId == userId, ct);
+
+        if (todoList is null)
+        {
+            throw new KeyNotFoundException("Todo list not found.");
+        }
+
         var taskItem = new TodoItem
         {
             Id = Guid.NewGuid(),
@@ -20,7 +29,7 @@ public class TasksRepo : ITaskService
             Order = request.Position ?? 0,
             Completed = false,
             DueDate = request.DueDate,
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = DateTimeOffset.UtcNow,
             UserId = userId
         };
 

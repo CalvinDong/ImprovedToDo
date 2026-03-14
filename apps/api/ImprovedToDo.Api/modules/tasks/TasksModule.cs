@@ -1,13 +1,16 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Api.Dtos.Tasks;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 public class TaskModule : IModule
 {
     public IServiceCollection RegisterModule(IServiceCollection services)
     {
-        services.AddScoped<ITaskService, TasksRepo>();
+        services.AddScoped<ITaskService, TaskService>();
+        services.AddScoped<IValidator<CreateTaskRequest>, CreateTaskValidator>();
         return services;
     }
 
@@ -32,16 +35,39 @@ public class TaskModule : IModule
 
     private static async Task<IResult> CreateTask(
         ITaskService TaskRepo, 
+        IValidator<CreateTaskRequest> validator,
         CreateTaskRequest request, 
         ClaimsPrincipal user, 
         CancellationToken ct)
     {
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return Results.ValidationProblem(validation.ToDictionary());
+               
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
-        var result = await TaskRepo.CreateTask(request, userId, ct);
-
-        return Results.Created($"/tasks/{result.Id}", result);
+        try
+        {
+            var result = await TaskRepo.CreateTask(request, userId, ct);
+            return Results.Created($"/tasks/{result.Id}", result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { message = ex.Message });
+        }
+        catch (DbUpdateException)
+        {
+            return Results.Problem(
+                title: "Database update failed",
+                detail: "The task could not be saved",
+                statusCode: StatusCodes.Status500InternalServerError
+            );
+        }
     }
 
 }

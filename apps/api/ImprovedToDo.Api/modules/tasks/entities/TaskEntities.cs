@@ -24,10 +24,10 @@ public class TodoItem
     public int Order { get; set; }
     public bool Completed { get; set; }
 
-    public DateTime? DueDate { get; set;}
+    public DateTimeOffset? DueDate { get; set;}
 
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 
     public List<TodoSubItem> SubItems { get; set; } = new();
     public List<TodoItemTag> TodoItemTags { get; set; } = new();
@@ -45,7 +45,7 @@ public class TodoSubItem
 
     public string Name { get; set; } = "";
     public bool Completed { get; set; }
-    public DateTime? DueDate { get; set;}
+    public DateTimeOffset? DueDate { get; set;}
 
     public int Order { get; set; }
 }
