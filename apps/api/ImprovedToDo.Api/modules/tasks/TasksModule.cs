@@ -11,6 +11,7 @@ public class TaskModule : IModule
     {
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IValidator<CreateTaskRequest>, CreateTaskValidator>();
+        services.AddScoped<IValidator<UpdateTaskRequest>, UpdateTaskValidator>();
         return services;
     }
 
@@ -21,11 +22,11 @@ public class TaskModule : IModule
             .RequireAuthorization();
 
         group.MapPost("/", CreateTask);
-        /*group.MapGet("/", GetTasks);
+        group.MapGet("/", GetTasks);
         group.MapGet("/{id:guid}", GetTaskById);
-        group.MapPatch("/{id:guid}", UpdateTask);
-        group.MapDelete("/{id:guid}", DeleteTask);
-
+        group.MapPatch("/{id:guid}", UpdateTasks);
+        group.MapDelete("/{id:guid}", DeleteTasks);
+        /*
         // Useful soon after:
         group.MapPatch("/{id:guid}/complete", SetTaskComplete);
         group.MapPatch("/{id:guid}/position", UpdateTaskPosition);*/
@@ -34,7 +35,7 @@ public class TaskModule : IModule
     }
 
     private static async Task<IResult> CreateTask(
-        ITaskService TaskRepo, 
+        ITaskService taskRepo, 
         IValidator<CreateTaskRequest> validator,
         CreateTaskRequest request, 
         ClaimsPrincipal user, 
@@ -49,7 +50,7 @@ public class TaskModule : IModule
 
         try
         {
-            var result = await TaskRepo.CreateTask(request, userId, ct);
+            var result = await taskRepo.CreateTask(request, userId, ct);
             return Results.Created($"/tasks/{result.Id}", result);
         }
         catch (KeyNotFoundException ex)
@@ -69,5 +70,76 @@ public class TaskModule : IModule
             );
         }
     }
+
+    
+    private static async Task<IResult> GetTasks(
+        ITaskService taskRepo,
+        [AsParameters] GetTasksQuery query,
+        ClaimsPrincipal user,
+        CancellationToken ct)
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Results.Unauthorized();
+
+        var result = await taskRepo.GetTasks(query, userId, ct);
+
+        return Results.Ok(result);
+
+    }
+
+    private static async Task<IResult> GetTaskById(
+        ITaskService taskRepo,
+        Guid id,
+        ClaimsPrincipal user,
+        CancellationToken ct
+    )
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Results.Unauthorized();
+
+        var result = await taskRepo.GetTaskById(id, userId, ct);
+
+        return result is not null 
+            ? Results.Ok(result)
+            : Results.NotFound();
+    }
+
+    private static async Task<IResult> UpdateTasks(
+        ITaskService taskRepo,
+        Guid id,
+        UpdateTaskRequest request,
+        ClaimsPrincipal user,
+        CancellationToken ct
+    )
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Results.Unauthorized();
+
+        var result = await taskRepo.UpdateTasks(request, id, userId, ct);
+
+        return result is not null
+            ? Results.Ok(result)
+            : Results.NotFound();
+    }
+
+    private static async Task<IResult> DeleteTasks(
+        ITaskService taskRepo,
+        Guid id,
+        ClaimsPrincipal user,
+        CancellationToken ct
+    )
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Results.Unauthorized();
+
+        var result = await taskRepo.DeleteTasks(id, userId, ct);
+
+        return result is not null
+            ? Results.NoContent()
+            : Results.NotFound();
+    }
+    
+
+
 
 }
