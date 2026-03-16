@@ -39,8 +39,9 @@ public class TaskModule : IModule
         CancellationToken ct)
     {
         var validation = await validator.ValidateAsync(request, ct);
+
         if (!validation.IsValid)
-            return Results.ValidationProblem(validation.ToDictionary());
+           throw new Api.Exceptions.ValidationException(validation.ToDictionary());
                
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
@@ -81,12 +82,17 @@ public class TaskModule : IModule
 
     private static async Task<IResult> UpdateTasks(
         ITaskService taskRepo,
+        IValidator<UpdateTaskRequest> validator,
         Guid id,
         UpdateTaskRequest request,
         ClaimsPrincipal user,
         CancellationToken ct
     )
     {
+         var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            throw new Api.Exceptions.ValidationException(validation.ToDictionary());
+            
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
