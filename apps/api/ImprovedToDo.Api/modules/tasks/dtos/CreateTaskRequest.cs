@@ -90,7 +90,7 @@ public sealed class TaskResponse
             Completed = task.Completed,
             DueDate = task.DueDate,
             TodoListId = task.TodoListId,
-            Position = task.Order,
+            Position = task.Position,
             CreatedAtUtc = task.CreatedAt,
             UpdatedAtUtc = task.UpdatedAt
         };
@@ -105,7 +105,7 @@ public sealed class TaskResponse
             Completed = task.Completed,
             DueDate = task.DueDate,
             TodoListId = task.TodoListId,
-            Position = task.Order,
+            Position = task.Position,
             CreatedAtUtc = task.CreatedAt,
             UpdatedAtUtc = task.UpdatedAt
         };

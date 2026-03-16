@@ -27,9 +27,9 @@ builder.Services
     .RegisterModules();
 
 
-
-
 var app = builder.Build();
+
+app.UseGlobalExceptionHandling();
 
 using (var scope = app.Services.CreateScope())
 {

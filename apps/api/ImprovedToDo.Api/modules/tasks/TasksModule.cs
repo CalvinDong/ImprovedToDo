@@ -1,9 +1,6 @@
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Api.Dtos.Tasks;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 public class TaskModule : IModule
 {
@@ -26,10 +23,10 @@ public class TaskModule : IModule
         group.MapGet("/{id:guid}", GetTaskById);
         group.MapPatch("/{id:guid}", UpdateTasks);
         group.MapDelete("/{id:guid}", DeleteTasks);
-        /*
+        
         // Useful soon after:
-        group.MapPatch("/{id:guid}/complete", SetTaskComplete);
-        group.MapPatch("/{id:guid}/position", UpdateTaskPosition);*/
+        group.MapPatch("/{id:guid}/complete", SetTasksComplete);
+        group.MapPatch("/{id:guid}/position", UpdateTasksPosition);
 
         return endpoints;
     }
@@ -48,27 +45,9 @@ public class TaskModule : IModule
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
-        try
-        {
-            var result = await taskRepo.CreateTask(request, userId, ct);
-            return Results.Created($"/tasks/{result.Id}", result);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return Results.NotFound(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return Results.BadRequest(new { message = ex.Message });
-        }
-        catch (DbUpdateException)
-        {
-            return Results.Problem(
-                title: "Database update failed",
-                detail: "The task could not be saved",
-                statusCode: StatusCodes.Status500InternalServerError
-            );
-        }
+        var result = await taskRepo.CreateTask(request, userId, ct);
+
+        return Results.Created($"/tasks/{result.Id}", result);
     }
 
     
@@ -97,11 +76,7 @@ public class TaskModule : IModule
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
-        var result = await taskRepo.GetTaskById(id, userId, ct);
-
-        return result is not null 
-            ? Results.Ok(result)
-            : Results.NotFound();
+        return Results.Ok(await taskRepo.GetTaskById(id, userId, ct));
     }
 
     private static async Task<IResult> UpdateTasks(
@@ -115,11 +90,7 @@ public class TaskModule : IModule
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
-        var result = await taskRepo.UpdateTasks(request, id, userId, ct);
-
-        return result is not null
-            ? Results.Ok(result)
-            : Results.NotFound();
+        return Results.Ok(await taskRepo.UpdateTasks(request, id, userId, ct));
     }
 
     private static async Task<IResult> DeleteTasks(
@@ -132,14 +103,39 @@ public class TaskModule : IModule
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
-        var result = await taskRepo.DeleteTasks(id, userId, ct);
+        await taskRepo.DeleteTasks(id, userId, ct);
 
-        return result is not null
-            ? Results.NoContent()
-            : Results.NotFound();
+        return Results.NoContent();
     }
     
 
+    private static async Task<IResult> SetTasksComplete (
+        ITaskService taskRepo,
+        Guid id, 
+        SetTaskCompleteRequest request, 
+        ClaimsPrincipal user,
+        CancellationToken ct
+        )
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Results.Unauthorized();
+
+        return Results.Ok(await taskRepo.SetTasksComplete(request, id, userId, ct));
+    }
+
+    private static async Task<IResult> UpdateTasksPosition(
+        ITaskService taskRepo,
+        UpdateTaskPositionRequest request,
+        Guid id,
+        ClaimsPrincipal user,
+        CancellationToken ct
+    )
+    {
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Results.Unauthorized();
+
+        return Results.Ok(await taskRepo.UpdateTasksPosition(request, id, userId, ct));
+    }
 
 
 }

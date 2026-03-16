@@ -1,7 +1,6 @@
 using Api.Dtos.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using Polly.CircuitBreaker;
+using Api.Exceptions;
 
 public class TaskService : ITaskService
 {
@@ -17,22 +16,21 @@ public class TaskService : ITaskService
         if (_context.TodoLists.Any())
         {
             var todoList = await _context.TodoLists
-            .FirstOrDefaultAsync(x => x.Id == request.TodoListId && x.UserId == userId, ct);
+            .AnyAsync(x => x.Id == request.TodoListId && x.UserId == userId, ct);
 
-            if (todoList is null)
+            if (!todoList)
             {
-                throw new KeyNotFoundException("Todo list not found.");
+                throw new NotFoundException("Todo list not found.");
             }
         }
         
-
         var taskItem = new TodoItem
         {
             Id = Guid.NewGuid(),
             TodoListId = request.TodoListId,
             Title = request.Title,
             Description = request.Description,
-            Order = request.Position ?? 0,
+            Position = request.Position ?? 0,
             Completed = false,
             DueDate = request.DueDate,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -40,7 +38,14 @@ public class TaskService : ITaskService
         };
 
         _context.TodoItems.Add(taskItem);
-        await _context.SaveChangesAsync(ct);
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Unable to create the task due to a database conflict.");
+        }
 
         return TaskResponse.FromEntity(taskItem);
     }
@@ -62,25 +67,23 @@ public class TaskService : ITaskService
             tasksQuery = tasksQuery.Where(x => x.Title.Contains(query.Search) || 
                                                (x.Description != null && x.Description.Contains(query.Search)));
         
-        var tasks = await tasksQuery
-            .OrderBy(x => x.Order)
+        return await tasksQuery
+            .OrderBy(x => x.Position)
             .ThenBy(x => x.CreatedAt)
             .Select(TaskResponse.Projection)
             .ToListAsync(ct);
-        
-
-        return tasks;
     }
 
-    public async Task<TaskResponse?> GetTaskById(Guid id, string userId, CancellationToken ct)
+    public async Task<TaskResponse> GetTaskById(Guid id, string userId, CancellationToken ct)
     {
         var task = await _context.TodoItems
         .AsNoTracking()
         .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
 
-        return task is not null 
-            ? TaskResponse.FromEntity(task) 
-            : null;
+        if (task is null)
+            throw new NotFoundException("Task not found.");
+
+        return TaskResponse.FromEntity(task);
     }
 
     public async Task<TaskResponse?> UpdateTasks(UpdateTaskRequest request, Guid id, string userId, CancellationToken ct)
@@ -89,7 +92,8 @@ public class TaskService : ITaskService
             .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
         
 
-        if (task is null) return null;
+        if (task is null) 
+            throw new NotFoundException("Task not found.");
 
         if (request.Title is not null)
             task.Title = request.Title;
@@ -104,26 +108,94 @@ public class TaskService : ITaskService
             task.Completed = request.Completed.Value;
 
         if (request.TodoListId.HasValue)
+        {
+            var todoListExists = await _context.TodoLists
+                .AnyAsync(x => x.Id == request.TodoListId.Value && x.UserId == userId, ct);
+
+            if (!todoListExists)
+                throw new NotFoundException("Todo list not found.");
+
             task.TodoListId = request.TodoListId.Value;
+        }
 
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
-        await _context.SaveChangesAsync(ct);
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("The task was modified by another request.");
+        }
 
         return TaskResponse.FromEntity(task);
     }
 
-    public async Task<bool?> DeleteTasks(Guid id, string userId, CancellationToken ct)
+    public async Task DeleteTasks(Guid id, string userId, CancellationToken ct)
     {
         var task = await _context.TodoItems
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
         
-        if (task is null) return null;
+        if (task is null)
+            throw new NotFoundException("Task not found.");
 
         _context.TodoItems.Remove(task);
-        await _context.SaveChangesAsync(ct);
 
-        return true;
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("The task was modified by another request.");
+        }
+    }
+
+    public async Task<TaskResponse> SetTasksComplete(SetTaskCompleteRequest request, Guid id, string userId, CancellationToken ct)
+    {
+        var task = await _context.TodoItems
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
+        
+        if (task is null)
+            throw new NotFoundException("Task not found.");
+
+        task.Completed = request.Completed;
+        task.UpdatedAt = DateTimeOffset.UtcNow;
+
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("The task was modified by another request.");
+        }
+
+        return TaskResponse.FromEntity(task);
+    }
+
+    public async Task<TaskResponse> UpdateTasksPosition(UpdateTaskPositionRequest request, Guid id, string userId, CancellationToken ct)
+    {
+         var task = await _context.TodoItems
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
+        
+        if (task is null)
+            throw new NotFoundException("Task not found.");
+
+        task.Position = request.Position;
+        task.UpdatedAt = DateTimeOffset.UtcNow;
+
+        try
+        {
+            await _context.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ConflictException("The task was modified by another request.");
+        }
+
+        return TaskResponse.FromEntity(task);
+
     }
 }
