@@ -38,10 +38,7 @@ public class TaskModule : IModule
         ClaimsPrincipal user, 
         CancellationToken ct)
     {
-        var validation = await validator.ValidateAsync(request, ct);
-
-        if (!validation.IsValid)
-           throw new Api.Exceptions.ValidationException(validation.ToDictionary());
+        await validator.ValidateAndThrowAsync(request, ct);
                
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
@@ -89,10 +86,8 @@ public class TaskModule : IModule
         CancellationToken ct
     )
     {
-         var validation = await validator.ValidateAsync(request, ct);
-        if (!validation.IsValid)
-            throw new Api.Exceptions.ValidationException(validation.ToDictionary());
-            
+        await validator.ValidateAndThrowAsync(request, ct);
+
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
