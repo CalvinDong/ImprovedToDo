@@ -4,16 +4,10 @@ import { envConfig } from "../utils/envValues";
 
 const AUTH_SERVER = envConfig.AUTH_SERVER;
 const CLIENT_ID = envConfig.CLIENT_ID;
-const REDIRECT_URI = `${envConfig.AUTH_SERVER}/auth/callback`;
+const REDIRECT_URI = `${envConfig.SPA_SERVER}/auth/callback`;
 const POST_LOGOUT_REDIRECT_URI = envConfig.SPA_SERVER;
 
-console.log(import.meta.env.VITE_API_URL);
-console.log(`${AUTH_SERVER}`)
-console.log(`${CLIENT_ID}`)
-console.log(`${REDIRECT_URI}`)
-console.log(`${POST_LOGOUT_REDIRECT_URI}`)
-
-const SCOPES = "openid profile email offline_access api";
+const SCOPES = "openid profile offline_access api";
 
 const STORAGE_KEYS = {
   accessToken: "access_token",
