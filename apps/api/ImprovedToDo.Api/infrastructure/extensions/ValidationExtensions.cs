@@ -10,7 +10,7 @@ public static class ValidationExtensions
     return services;
   }
 
-  public static async Task ValidateAndThrowAsync<T>(
+  public static async Task ValidateAndThrowAsync<T>( // For converting Validation Error to custom error type in for middleware
         this IValidator<T> validator,
         T instance,
         CancellationToken ct)

@@ -24,7 +24,8 @@ builder.Services
     .AddOpenIddictServices()
     .AddValidation()
     .AddSwaggerDocs()
-    .RegisterModules();
+    .RegisterModules()
+    .AddCors();
 
 
 var app = builder.Build();
@@ -52,6 +53,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseCors("SpaCors");
 
 app.UseAuthentication();
 app.UseAuthorization();
