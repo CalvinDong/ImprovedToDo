@@ -60,7 +60,7 @@ public static class OpenIddictSeeder
 
             PostLogoutRedirectUris =
             {
-                new Uri("http://localhost:5173/")
+                new Uri("http://localhost:5173/logout-page")
             },
 
             Requirements =
@@ -72,6 +72,7 @@ public static class OpenIddictSeeder
             {   
                 OpenIddictConstants.Permissions.Endpoints.Authorization,
                 OpenIddictConstants.Permissions.Endpoints.Token,
+                OpenIddictConstants.Permissions.Endpoints.EndSession,
 
                 OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
                 OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleAuthCallback } from "../auth/authService";
 import { useAuth } from "../auth/authContext";
@@ -7,8 +7,12 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const { syncFromStorage, clearSession } = useAuth();
   const [error, setError] = useState("");
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
     async function run() {
       try {
         await handleAuthCallback(window.location.search);

@@ -5,7 +5,7 @@ import { envConfig } from "../utils/envValues";
 const AUTH_SERVER = envConfig.AUTH_SERVER;
 const CLIENT_ID = envConfig.CLIENT_ID;
 const REDIRECT_URI = `${envConfig.SPA_SERVER}/auth/callback`;
-const POST_LOGOUT_REDIRECT_URI = envConfig.SPA_SERVER;
+const POST_LOGOUT_REDIRECT_URI = `${envConfig.SPA_SERVER}/logout-page`;
 
 const SCOPES = "openid profile offline_access api";
 

@@ -24,6 +24,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [accessToken, setAccessToken] = useState<string | null>(() => getAccessToken());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => hasAuth());
+  const [isLoggingOut, setIsLoggingOut] = useState(true);
 
   async function login(): Promise<void> {
     await beginLogin();
@@ -46,25 +47,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
     clearTokens();
     setAccessToken(null);
     setIsAuthenticated(false);
+    setIsLoggingOut(false)
   }
 
   function logout(): void {
+    setIsLoggingOut(true);
     authLogout();
-    setAccessToken(null);
-    setIsAuthenticated(false);
   }
 
   const value = useMemo<AuthContextValue>(
     () => ({
       accessToken,
       isAuthenticated,
+      isLoggingOut,
       login,
       logout,
       refreshAccessToken,
       syncFromStorage,
       clearSession,
     }),
-    [accessToken, isAuthenticated]
+    [accessToken, isAuthenticated, isLoggingOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

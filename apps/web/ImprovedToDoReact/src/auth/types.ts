@@ -10,6 +10,7 @@ export interface TokenResponse {
 export interface AuthContextValue {
   accessToken: string | null;
   isAuthenticated: boolean;
+  isLoggingOut: boolean;
   login: () => Promise<void>;
   logout: () => void;
   refreshAccessToken: () => Promise<string | null>;
