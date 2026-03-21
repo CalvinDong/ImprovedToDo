@@ -12,13 +12,13 @@ This will be a webapp with plans for conversion to phone/desktop app and will us
 - Tailwind
 - Daisy UI
 
-/*Backend*/
+**Backend**
 - ASP.NET Core 9
 - ASP.NET Identity
 - OppenIddict
 - Postgres SQL DB
 - SQLite (For local storage in app)
 
-/*Hosting*/
+**Hosting**
 - Azure App Service (Backend)
 - Vercel (Frontend)
