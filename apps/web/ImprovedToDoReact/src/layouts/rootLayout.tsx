@@ -1,46 +1,41 @@
-import { Link, Outlet } from "react-router-dom";
-import { useAuth } from "../auth/authContext";
+import {
+  Panel,
+  Group,
+  Separator,
+} from "react-resizable-panels";
+import { Outlet } from "react-router-dom";
 
-export default function RootLayout() {
-  const { isAuthenticated, logout } = useAuth();
+export default function AppShellLayout() {
+  const selectedTask = null; // replace with real state
 
   return (
-    <div className="min-h-screen bg-base-200">
-      <nav className="navbar bg-base-100 shadow-sm px-4">
-        <div className="flex-1">
-          <Link to="/" className="btn btn-ghost text-xl">
-            Todo App
-          </Link>
-        </div>
+    <div className="h-full">
+      <Group className="flex h-full">
+        <Panel defaultSize="0%" minSize="20%">
+          <aside className="h-full border-r border-base-300 bg-base-200">
+            Left nav
+          </aside>
+        </Panel>
 
-        <div className="flex gap-2">
-          <Link to="/" className="btn btn-ghost">
-            Home
-          </Link>
+        <Separator className="w-1 bg-base-300 hover:bg-primary transition-colors" />
 
-          {isAuthenticated ? (
-            <>
-              <Link to="/app" className="btn btn-ghost">
-                App
-              </Link>
-              <Link to="/app/tasks" className="btn btn-ghost">
-                Tasks
-              </Link>
-              <button className="btn btn-primary" onClick={logout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link to="/login" className="btn btn-primary">
-              Login
-            </Link>
-          )}
-        </div>
-      </nav>
+        <Panel defaultSize={selectedTask ? 55 : 80} minSize="20%">
+          <main className="h-full bg-base-100 min-h-0">
+            <Outlet />
+          </main>
+        </Panel>
 
-      <main className="p-6">
-        <Outlet />
-      </main>
+        {selectedTask && (
+          <>
+            <Separator className="w-1 bg-base-300 hover:bg-primary transition-colors" />
+            <Panel defaultSize="0%" minSize="20%" collapsible>
+              <aside className="h-full border-l border-base-300 bg-base-200">
+                Task details
+              </aside>
+            </Panel>
+          </>
+        )}
+      </Group>
     </div>
   );
 }

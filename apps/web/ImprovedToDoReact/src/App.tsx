@@ -26,9 +26,6 @@ function App() {
         </p>
         <button className="btn btn-primary">Test</button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
