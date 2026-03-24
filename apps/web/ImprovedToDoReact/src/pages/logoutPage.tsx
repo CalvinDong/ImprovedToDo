@@ -13,6 +13,7 @@ export default function LogoutPage(){
 
     return(
         <div className="min-h-screen grid place-items-center p-6">
+            <span className="loading loading-ring loading-xl"></span>
             <h1> Logging Out</h1>
         </div>
     )

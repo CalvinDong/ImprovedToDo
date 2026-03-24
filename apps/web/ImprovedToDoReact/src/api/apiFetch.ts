@@ -20,6 +20,13 @@ export async function apiFetch(
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     },
   });
+  console.log(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(options.headers ?? {}),
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
+  })
 
   if (response.status === 401) {
     accessToken = await refreshTokens();

@@ -16,7 +16,7 @@ public class TaskModule : IModule
     {
         var group = endpoints.MapGroup("/tasks")
             .WithTags("Tasks")
-            .RequireAuthorization();
+            .RequireAuthorization("ApiPolicy");
 
         group.MapPost("/", CreateTask);
         group.MapGet("/", GetTasks);
