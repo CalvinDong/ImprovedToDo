@@ -984,6 +984,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.95.2":
+  version: 5.95.2
+  resolution: "@tanstack/query-core@npm:5.95.2"
+  checksum: 10c0/6559483b30dd9ce7fc5d466d54a7ebfe4ca5b5d7f8ce37833a4048516b55565d3072526d74264fa974afbe49a0ae11c9a99ecc1d9ab525966360565ebc600083
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.95.2":
+  version: 5.95.2
+  resolution: "@tanstack/react-query@npm:5.95.2"
+  dependencies:
+    "@tanstack/query-core": "npm:5.95.2"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/d0e3d3601ccc839043ce7351c369f8826c7363e753db4fec59d07bee0d62efdfa606baf8227597eb54c4d4eb18ab3f594f0cd4e164721acb79ab3628115d72d8
+  languageName: node
+  linkType: hard
+
 "@todo/contracts@workspace:*, @todo/contracts@workspace:packages/contracts":
   version: 0.0.0-use.local
   resolution: "@todo/contracts@workspace:packages/contracts"
@@ -2010,6 +2028,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.39.1"
     "@tailwindcss/vite": "npm:^4.2.1"
+    "@tanstack/react-query": "npm:^5.95.2"
     "@todo/contracts": "workspace:*"
     "@types/node": "npm:^24.10.1"
     "@types/react": "npm:^19.2.7"

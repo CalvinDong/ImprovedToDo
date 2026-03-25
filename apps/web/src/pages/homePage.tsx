@@ -1,4 +1,4 @@
-import ListComponent from "../components/list";
+import ListComponent from "../components/listComponent";
 
 export default function HomePage(){
     return(
