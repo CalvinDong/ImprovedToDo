@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getTasksList } from "../api/tasks";
-import type { TaskDto } from "../../../../../packages/contracts/src/task";
-//import type { TodoItemDto } from "@todo/contracts";
+import type { TaskDto } from "@todo/contracts";
 
 interface Props {
   list: string;
