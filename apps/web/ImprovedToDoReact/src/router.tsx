@@ -8,7 +8,7 @@ import AuthCallbackPage from "./pages/authCallbackPage";
 import LandingPage from "./pages/landingPage";
 //import AppPage from "../pages/AppPage";
 //import TasksPage from "../pages/TasksPage";
-import App from "./App";
+//import App from "./App";
 
 
 export const router = createBrowserRouter([

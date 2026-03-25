@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
       try {
         await handleAuthCallback(window.location.search);
         syncFromStorage();
-        navigate("/app", { replace: true });
+        navigate("/home", { replace: true });
       } catch (err) {
         clearSession();
 
