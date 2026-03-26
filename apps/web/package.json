@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.95.2",
     "@todo/contracts": "workspace:*",
+    "framer-motion": "^12.38.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-resizable-panels": "^4.7.5",

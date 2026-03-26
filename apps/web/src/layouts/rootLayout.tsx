@@ -1,22 +1,85 @@
-import {
-  Panel,
-  Group,
-  Separator,
-} from "react-resizable-panels";
-import { Outlet, Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Outlet, useOutletContext, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../auth/authContext";
+import type { TaskDto } from "@todo/contracts";
+
+export type AppShellOutletContext = {
+  selectedTask: TaskDto | null;
+  setSelectedTask: React.Dispatch<React.SetStateAction<TaskDto | null>>;
+};
+
+function pxToRem(px: number) {
+  const rootFontSize = parseFloat(
+    getComputedStyle(document.documentElement).fontSize
+  );
+  return px / rootFontSize;
+}
+
 
 export default function AppShellLayout() {
-  const selectedTask = null; // replace with real state
-  const { logout } = useAuth();
-  
+  const [leftWidth, setLeftWidth] = useState(280);
+  const [rightWidth, setRightWidth] = useState(360);
+  const [selectedTask, setSelectedTask] = useState<TaskDto | null>(null);
 
-  return (
-    <div className="h-full">
-      <Group className="flex h-full">
-        <Panel defaultSize="0%" minSize="20%">
-          <aside className="h-full border-r border-base-300 bg-base-200 px-5 py-2">
-            <div className="flex flex-col">
+  const { logout } = useAuth();
+
+  const draggingRef = useRef<null | "left" | "right">(null);
+
+  const rightOpen = !!selectedTask;
+
+  // 🧠 Drag logic (still px-based)
+  useEffect(() => {
+    function onMouseMove(e: MouseEvent) {
+      if (draggingRef.current === "left") {
+        setLeftWidth(Math.max(200, Math.min(500, e.clientX)));
+      }
+
+      if (draggingRef.current === "right") {
+        const next = window.innerWidth - e.clientX;
+        setRightWidth(Math.max(280, Math.min(600, next)));
+      }
+    }
+
+    function onMouseUp() {
+      draggingRef.current = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  function startDragging(side: "left" | "right") {
+    draggingRef.current = side;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }
+
+  const templateColumns = `
+    ${pxToRem(leftWidth)}rem 
+    0.375rem 
+    1fr 
+    0.375rem 
+    ${rightOpen ? `${pxToRem(rightWidth)}rem` : "0rem"}
+  `;
+
+  return(
+    <motion.div
+      layout
+      transition={{ type: "spring", stiffness: 320, damping: 32 }}
+      className="grid h-screen overflow-hidden bg-base-100"
+      style={{ gridTemplateColumns: templateColumns }}
+    >
+      {/* LEFT PANEL */}
+      <aside className="min-w-0 overflow-hidden border-r border-base-300 bg-base-200 p-4">
+        <div className="flex flex-col">
               <Link to="/" className="my-1.5">Home</Link>
               <Link to="/the-day" className="my-1.5">The Day</Link>
               <Link to="/profile" className="my-1.5">Profile</Link>
@@ -25,29 +88,67 @@ export default function AppShellLayout() {
               </button>
               <div className="divider my-1.5 "></div>
             </div>
-             
-          </aside>
-        </Panel>
+      </aside>
 
-        <Separator className="w-1 bg-base-300 hover:bg-primary transition-colors" />
+      {/* LEFT RESIZER */}
+      <div
+        className="cursor-col-resize bg-base-300 hover:bg-primary transition-colors"
+        onMouseDown={() => startDragging("left")}
+      />
 
-        <Panel defaultSize={selectedTask ? 55 : 80} minSize="20%">
-          <main className="h-full bg-base-100 min-h-0">
-            <Outlet />
-          </main>
-        </Panel>
+      {/* MAIN PANEL */}
+      <motion.main className="min-w-0 overflow-auto bg-base-100 p-6" layout transition={{ type: "spring", stiffness: 320, damping: 32 }} >
+        <Outlet context={{ selectedTask, setSelectedTask } satisfies AppShellOutletContext}  />
+      </motion.main>
 
-        {selectedTask && (
-          <>
-            <Separator className="w-1 bg-base-300 hover:bg-primary transition-colors" />
-            <Panel defaultSize="0%" minSize="20%" collapsible>
-              <aside className="h-full border-l border-base-300 bg-base-200">
-                Task details
-              </aside>
-            </Panel>
-          </>
-        )}
-      </Group>
-    </div>
+      {/* RIGHT RESIZER */}
+      <motion.div
+        className={`cursor-col-resize transition-colors ${
+          rightOpen ? "bg-base-300 hover:bg-primary" : "bg-transparent"
+        }`}
+        onMouseDown={() => {
+          if (rightOpen) startDragging("right");
+        }}
+        layout
+        transition={{ duration: 0.25 }}
+      />
+
+      {/* RIGHT PANEL */}
+      <motion.aside
+        layout
+        className="min-w-0 overflow-hidden border-l border-base-300 bg-base-200"
+        transition={{ duration: 0.25 }}
+      >
+        <AnimatePresence mode="wait">
+          {rightOpen && selectedTask && (
+            <motion.div
+              key={selectedTask.id}
+              initial={{ x: "2rem", opacity: 0 }}
+              animate={{ x: "0rem", opacity: 1 }}
+              exit={{ x: "2rem", opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="h-full p-4"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Task details</h2>
+                <button
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => setSelectedTask(null)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-medium">{selectedTask.title}</p>
+                <p className="text-sm text-base-content/70">
+                  Description: {selectedTask.description}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.aside>
+    </motion.div>
   );
 }

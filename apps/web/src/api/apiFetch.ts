@@ -13,20 +13,16 @@ export async function apiFetch(
 ): Promise<Response> {
   let accessToken = getAccessToken();
 
-  let response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...(options.headers ?? {}),
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-  });
-  console.log(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...(options.headers ?? {}),
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    },
-  })
+  const makeRequest = (token: string | null) =>
+    fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...(options.headers ?? {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+  let response = await makeRequest(accessToken);
 
   if (response.status === 401) {
     accessToken = await refreshTokens();
@@ -36,13 +32,7 @@ export async function apiFetch(
       throw new Error("Session expired.");
     }
 
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers: {
-        ...(options.headers ?? {}),
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    response = await makeRequest(accessToken);
   }
 
   return response;
