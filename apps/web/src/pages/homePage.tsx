@@ -2,8 +2,11 @@ import ListComponent from "../components/listComponent";
 
 export default function HomePage(){
     return(
-        <div className="flex flex-col my-2 mx-3 gap-3">
-            <h1>The Day</h1>
+        <div className="flex flex-col mx-3 gap-3">
+            <div className="flex justify-start items-center gap-3">
+                <h1 className="text-4xl font-bold">The Day</h1>
+            </div>
+            
             <ListComponent list="tasks"/>
         </div>
         

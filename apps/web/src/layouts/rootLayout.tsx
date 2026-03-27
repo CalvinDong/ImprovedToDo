@@ -78,7 +78,7 @@ export default function AppShellLayout() {
       style={{ gridTemplateColumns: templateColumns }}
     >
       {/* LEFT PANEL */}
-      <aside className="min-w-0 overflow-hidden border-r border-base-300 bg-base-200 p-4">
+      <aside className="min-w-0 overflow-hidden border-base-300 bg-base-100 p-4">
         <div className="flex flex-col">
               <Link to="/" className="my-1.5">Home</Link>
               <Link to="/the-day" className="my-1.5">The Day</Link>
@@ -92,12 +92,12 @@ export default function AppShellLayout() {
 
       {/* LEFT RESIZER */}
       <div
-        className="cursor-col-resize bg-base-300 hover:bg-primary transition-colors"
+        className="cursor-col-resize border-none box-shadow-xl hover:bg-primary transition-colors"
         onMouseDown={() => startDragging("left")}
       />
 
       {/* MAIN PANEL */}
-      <motion.main className="min-w-0 overflow-auto bg-base-100 p-6" layout transition={{ type: "spring", stiffness: 320, damping: 32 }} >
+      <motion.main className="min-w-0 overflow-auto bg-base-300 p-6" layout="position" transition={{ type: "spring", stiffness: 320, damping: 32 }} >
         <Outlet context={{ selectedTask, setSelectedTask } satisfies AppShellOutletContext}  />
       </motion.main>
 
@@ -127,10 +127,10 @@ export default function AppShellLayout() {
               animate={{ x: "0rem", opacity: 1 }}
               exit={{ x: "2rem", opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="h-full p-4"
+              className="flex flex-col h-full p-4"
             >
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Task details</h2>
+              <div className="mb-4 flex justify-between">
+                <h2 className="text-xl font-semibold">{selectedTask.title}</h2>
                 <button
                   className="btn btn-sm btn-ghost"
                   onClick={() => setSelectedTask(null)}
@@ -140,9 +140,8 @@ export default function AppShellLayout() {
               </div>
 
               <div className="space-y-2">
-                <p className="font-medium">{selectedTask.title}</p>
-                <p className="text-sm text-base-content/70">
-                  Description: {selectedTask.description}
+                <p className="text-md font-semibold text-base-content/70">
+                  {selectedTask.description}
                 </p>
               </div>
             </motion.div>

@@ -2,6 +2,7 @@ import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { tasksQueryOptions } from "../queries/taskQueries";
 import { motion, AnimatePresence } from "framer-motion";
+import TaskCard from "./cardComponent";
 import type { TaskDto } from "@todo/contracts";
 
 interface Props {
@@ -35,26 +36,36 @@ const ListComponent = ({ list }: Props) => {
         <div className="flex flex-col gap-3">
             <AnimatePresence mode="wait">
                 {tasks.map((item) => (
-                <motion.div
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.25 }}
-                    className="card card-xs bg-base-200 shadow-sm p-4!"
-                >
-                    <div className="card-body gap-0">
-                    <div className="flex gap-2">
-                        <button className="btn btn-xs" onClick={() => setSelectedTask(item)}>t</button>
+                    <TaskCard key={item.id} onClick={() => setSelectedTask(item)}>
                         <p className="card-title">{item.title}</p>
-                    </div>
-                    <div className="justify-end card-actions"></div>
-                    </div>
-                </motion.div>
+                    </TaskCard>
                 ))}
+
+                <TaskCard>
+                <input
+                    type="text"
+                    className="input shadow-none h-8 p-0 leading-none border-none bg-transparent w-full
+                                   focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
+                    placeholder="Add new task"
+                    onClick={(e) => e.stopPropagation()}
+                />
+                </TaskCard>
+
+                {/* Explanation for div card height and padding above
+                   h-16 = 4rem (total card height)
+                   p-4 top + bottom = 2rem total 
+                   remaining space = 2rem
+
+                   input h-8 = 2rem
+
+                   {
+                    top pad (1 rem)
+                    empty content area (2 rem)
+                    bottom pad (1 rem)
+                   }
+                */}
             </AnimatePresence>
-        </div>
+            </div>
     );
 };
 
