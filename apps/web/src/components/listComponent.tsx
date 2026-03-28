@@ -1,9 +1,9 @@
 import { useOutletContext } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { tasksQueryOptions } from "../queries/taskQueries";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createTask, tasksQueryOptions } from "../queries/taskQueries";
+import { AnimatePresence } from "framer-motion";
 import TaskCard from "./cardComponent";
-import type { TaskDto } from "@todo/contracts";
+import type { CreateTaskRequest, TaskDto } from "@todo/contracts";
 
 interface Props {
   list: string;
@@ -15,7 +15,8 @@ type AppShellContext = {
 };
 
 const ListComponent = ({ list }: Props) => {
-    const { setSelectedTask, selectedTask } = useOutletContext<AppShellContext>();
+    const { setSelectedTask } = useOutletContext<AppShellContext>();
+    const queryClient = useQueryClient();
 
     const {
         data: tasks = [],
@@ -23,6 +24,13 @@ const ListComponent = ({ list }: Props) => {
         isError,
         error,
     } = useQuery(tasksQueryOptions(list));
+
+    const createTaskMutation = useMutation({
+        mutationFn: (data: CreateTaskRequest) => createTask(list, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks", list] });
+        },
+    });
 
     if (isLoading) {
         return <div>Loading tasks...</div>;
@@ -48,6 +56,19 @@ const ListComponent = ({ list }: Props) => {
                                    focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
                     placeholder="Add new task"
                     onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                        const value = e.currentTarget.value.trim();
+                        if (!value) return;
+                        const response:CreateTaskRequest = {title: value,
+                            description: null,
+                            listId: ""
+                        }
+
+                        createTaskMutation.mutate(response);
+                        e.currentTarget.value = "";
+                        }
+                    }}
                 />
                 </TaskCard>
 

@@ -14,7 +14,7 @@ export async function apiFetch(
   let accessToken = getAccessToken();
 
   const makeRequest = (token: string | null) =>
-    fetch(`${API_BASE_URL}${path}`, {
+    fetch(`${API_BASE_URL}/${path}`, {
       ...options,
       headers: {
         ...(options.headers ?? {}),

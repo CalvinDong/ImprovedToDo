@@ -1,9 +1,22 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getTasksList } from "../api/tasks";
+import { getJson, sendJson } from "../api/tasks";
+import type { TaskDto, CreateTaskRequest } from "@todo/contracts";
 
 export const tasksQueryOptions = (list: string) =>
   queryOptions({
     queryKey: ["tasks", list],
-    queryFn: () => getTasksList(list),
+    queryFn: () => getJson<TaskDto[]>(list),
     staleTime: 1000 * 60,
   });
+
+export function createTask(
+  list: string,
+  data: CreateTaskRequest
+): Promise<TaskDto> {
+  return sendJson<CreateTaskRequest, TaskDto>(
+    `${list}`,
+    "POST",
+    data
+  );
+}
+

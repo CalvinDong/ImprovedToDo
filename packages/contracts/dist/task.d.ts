@@ -24,7 +24,7 @@ export interface TaskDto {
 export interface CreateTaskRequest {
     title: string;
     description?: string | null;
-    listId: string;
+    listId?: string;
 }
 export interface UpdateTaskRequest {
     title?: string;
