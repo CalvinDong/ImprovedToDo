@@ -14,12 +14,12 @@ export interface SubTaskDto {
 export interface TaskDto {
   id: string
   title: string
-  description: string | null
-  listId: string
-  order: number
-  tags: TagDto[]
-  connectedTaskIds: string[]
-  subtasks: SubTaskDto[]
+  description?: string | null
+  listId?: string
+  order?: number
+  tags?: TagDto[]
+  connectedTaskIds?: string[]
+  subtasks?: SubTaskDto[]
   createdAt: string
   updatedAt: string
 }

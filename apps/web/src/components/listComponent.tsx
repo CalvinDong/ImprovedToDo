@@ -14,9 +14,14 @@ type AppShellContext = {
   setSelectedTask: React.Dispatch<React.SetStateAction<TaskDto | null>>;
 };
 
+type TaskViewModel = TaskDto & {
+    isOptimistic?: boolean;
+};
+
 const ListComponent = ({ list }: Props) => {
     const { setSelectedTask } = useOutletContext<AppShellContext>();
     const queryClient = useQueryClient();
+    const queryKey = ["tasks", list];
 
     const {
         data: tasks = [],
@@ -26,10 +31,49 @@ const ListComponent = ({ list }: Props) => {
     } = useQuery(tasksQueryOptions(list));
 
     const createTaskMutation = useMutation({
-        mutationFn: (data: CreateTaskRequest) => createTask(list, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["tasks", list] });
+        mutationFn: async (data: CreateTaskRequest) => {
+            await new Promise((r) => setTimeout(r, 2000))
+            return createTask(list, data);
         },
+            
+
+        onMutate: async (data) => {
+            await queryClient.cancelQueries({ queryKey });
+
+            const previousTasks = queryClient.getQueryData<TaskViewModel[]>(queryKey);
+
+            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) => [
+                ...old,
+                {
+                    id: crypto.randomUUID(),
+                    title: data.title,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    isOptimistic: true,
+                },
+            ]);
+
+            return { previousTasks };
+        },
+
+        onError: (_err, _newTask, context) => {
+            if (context?.previousTasks) {
+            queryClient.setQueryData(queryKey, context.previousTasks);
+            }
+        },
+
+        onSuccess: (newTask) => {
+            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
+                old.map((task) =>
+                task.isOptimistic ? newTask : task
+                )
+            );
+        },
+
+        /*onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        },*/
+
     });
 
     if (isLoading) {
@@ -42,7 +86,6 @@ const ListComponent = ({ list }: Props) => {
 
     return (
         <div className="flex flex-col gap-3">
-            <AnimatePresence mode="wait">
                 {tasks.map((item) => (
                     <TaskCard key={item.id} onClick={() => setSelectedTask(item)}>
                         <p className="card-title">{item.title}</p>
@@ -85,7 +128,6 @@ const ListComponent = ({ list }: Props) => {
                     bottom pad (1 rem)
                    }
                 */}
-            </AnimatePresence>
             </div>
     );
 };
