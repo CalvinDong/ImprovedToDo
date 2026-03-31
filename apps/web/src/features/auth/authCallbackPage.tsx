@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleAuthCallback } from "../auth/authService";
-import { useAuth } from "../auth/authContext";
+import { handleAuthCallback } from "./authService";
+import { useAuth } from "./authContext";
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();

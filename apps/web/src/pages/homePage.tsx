@@ -1,4 +1,4 @@
-import ListComponent from "../components/listComponent";
+import TaskList from "../features/tasks/taskList"
 
 export default function HomePage(){
     return(
@@ -7,7 +7,7 @@ export default function HomePage(){
                 <h1 className="text-4xl font-bold">The Day</h1>
             </div>
             
-            <ListComponent list="tasks"/>
+            <TaskList list="tasks"/>
         </div>
         
     )

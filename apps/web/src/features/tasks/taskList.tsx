@@ -1,8 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTask, tasksQueryOptions } from "../queries/taskQueries";
-import { AnimatePresence } from "framer-motion";
-import TaskCard from "./cardComponent";
+import { createTask, tasksQueryOptions } from "./taskQueries";
+import TaskCard from "./taskCard.tsx";
 import type { CreateTaskRequest, TaskDto } from "@todo/contracts";
 
 interface Props {
@@ -23,7 +22,7 @@ type CreateTaskMutationInput = CreateTaskRequest & {
   clientId: string;
 };
 
-const ListComponent = ({ list }: Props) => {
+const TaskList = ({ list }: Props) => {
     const { setSelectedTask } = useOutletContext<AppShellContext>();
     const queryClient = useQueryClient();
     const queryKey = ["tasks", list];
@@ -37,7 +36,7 @@ const ListComponent = ({ list }: Props) => {
 
     const createTaskMutation = useMutation({
         mutationFn: async ({ clientId: _clientId, ...data }: CreateTaskMutationInput) => {
-            await new Promise((r) => setTimeout(r, 2000));
+            //await new Promise((r) => setTimeout(r, 2000));
             return createTask(list, data);
         },
             
@@ -144,4 +143,4 @@ const ListComponent = ({ list }: Props) => {
     );
 };
 
-export default ListComponent;
+export default TaskList;

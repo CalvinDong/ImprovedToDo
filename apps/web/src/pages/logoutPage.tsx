@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/authContext"
+import { useAuth } from "../features/auth/authContext"
 
 export default function LogoutPage(){
     const { clearSession } = useAuth();

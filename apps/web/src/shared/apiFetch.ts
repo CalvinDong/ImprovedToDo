@@ -2,8 +2,8 @@ import {
   clearTokens,
   getAccessToken,
   refreshTokens,
-} from "../auth/authService";
-import { envConfig } from "../utils/envValues";
+} from "../features/auth/authService";
+import { envConfig } from "./envValues";
 
 const API_BASE_URL = envConfig.AUTH_SERVER;
 

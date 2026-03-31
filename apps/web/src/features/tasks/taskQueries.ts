@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getJson, sendJson } from "../api/tasks";
+import { getJson, sendJson } from "./tasksApi";
 import type { TaskDto, CreateTaskRequest } from "@todo/contracts";
 
 export const tasksQueryOptions = (list: string) =>

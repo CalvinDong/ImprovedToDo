@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../auth/authContext"
+import { useAuth } from "../features/auth/authContext"
 import WelcomePage from "./welcomePage";
 
 export default function LandingPage() {

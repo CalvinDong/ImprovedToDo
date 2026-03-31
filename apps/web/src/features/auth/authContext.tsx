@@ -13,7 +13,7 @@ import {
   logout as authLogout,
   refreshTokens,
 } from "./authService";
-import type { AuthContextValue } from "./types";
+import type { AuthContextValue } from "./authTypes";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 

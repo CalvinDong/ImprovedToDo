@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../auth/authContext";
+import { useAuth } from "../features/auth/authContext";
 import type { TaskDto } from "@todo/contracts";
 
 export type AppShellOutletContext = {

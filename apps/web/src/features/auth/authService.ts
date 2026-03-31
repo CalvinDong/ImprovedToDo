@@ -1,6 +1,6 @@
 import { createPkcePair, randomString } from "./pkce";
-import type { TokenResponse } from "./types";
-import { envConfig } from "../utils/envValues";
+import type { TokenResponse } from "./authTypes";
+import { envConfig } from "../../shared/envValues";
 
 const AUTH_SERVER = envConfig.AUTH_SERVER;
 const CLIENT_ID = envConfig.CLIENT_ID;

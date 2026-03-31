@@ -1,4 +1,4 @@
-import { apiFetch } from "./apiFetch";
+import { apiFetch } from "../../shared/apiFetch";
 import type { TaskDto } from "@todo/contracts";
 
 export async function getTasksList(path: string): Promise<TaskDto[]> {
