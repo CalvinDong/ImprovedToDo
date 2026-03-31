@@ -16,6 +16,11 @@ type AppShellContext = {
 
 type TaskViewModel = TaskDto & {
     isOptimistic?: boolean;
+    clientId?: string;
+};
+
+type CreateTaskMutationInput = CreateTaskRequest & {
+  clientId: string;
 };
 
 const ListComponent = ({ list }: Props) => {
@@ -31,8 +36,8 @@ const ListComponent = ({ list }: Props) => {
     } = useQuery(tasksQueryOptions(list));
 
     const createTaskMutation = useMutation({
-        mutationFn: async (data: CreateTaskRequest) => {
-            await new Promise((r) => setTimeout(r, 2000))
+        mutationFn: async ({ clientId: _clientId, ...data }: CreateTaskMutationInput) => {
+            await new Promise((r) => setTimeout(r, 2000));
             return createTask(list, data);
         },
             
@@ -45,7 +50,8 @@ const ListComponent = ({ list }: Props) => {
             queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) => [
                 ...old,
                 {
-                    id: crypto.randomUUID(),
+                    id: data.clientId, // temp id for React key stability
+                    clientId: data.clientId,
                     title: data.title,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
@@ -53,7 +59,7 @@ const ListComponent = ({ list }: Props) => {
                 },
             ]);
 
-            return { previousTasks };
+            return { previousTasks, clientId: data.clientId };
         },
 
         onError: (_err, _newTask, context) => {
@@ -62,11 +68,15 @@ const ListComponent = ({ list }: Props) => {
             }
         },
 
-        onSuccess: (newTask) => {
+        onSuccess: (newTask, _variables, context) => {
+            if (!context?.clientId) return;
+
             queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
-                old.map((task) =>
-                task.isOptimistic ? newTask : task
-                )
+            old.map((task) =>
+                task.clientId === context.clientId
+                ? newTask
+                : task
+            )
             );
         },
 
@@ -101,11 +111,13 @@ const ListComponent = ({ list }: Props) => {
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                        const value = e.currentTarget.value.trim();
-                        if (!value) return;
-                        const response:CreateTaskRequest = {title: value,
-                            description: null,
-                            listId: ""
+                            const value = e.currentTarget.value.trim();
+                            if (!value) return;
+                            const response: CreateTaskMutationInput = {
+                                clientId: crypto.randomUUID(),
+                                title: value,
+                                description: null,
+                                listId: ""
                         }
 
                         createTaskMutation.mutate(response);
