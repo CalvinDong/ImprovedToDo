@@ -10,7 +10,7 @@ export default function TaskCard({ onClick, children }: TaskCardProps) {
                  hover:bg-primary-content transition-colors"
       onClick={onClick}
     >
-      <div className="flex h-full items-center w-full">
+      <div className="flex h-full items-center justify-between w-full">
         {children}
       </div>
     </div>

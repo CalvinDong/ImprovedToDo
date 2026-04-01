@@ -15,6 +15,7 @@ export interface TaskDto {
   id: string
   title: string
   description?: string | null
+  completed: boolean
   listId?: string
   order?: number
   tags?: TagDto[]
@@ -40,4 +41,8 @@ export interface MoveTaskRequest {
   sourceListId: string
   destinationListId: string
   newOrder: number
+}
+
+export interface SetTaskCompletedRequest {
+  completed: boolean
 }

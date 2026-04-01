@@ -1,15 +1,4 @@
-import { apiFetch } from "../../shared/apiFetch";
-import type { TaskDto } from "@todo/contracts";
-
-export async function getTasksList(path: string): Promise<TaskDto[]> {
-  const response = await apiFetch(`/${path}`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to get tasks: ${response.status}`);
-  }
-
-  return response.json() as Promise<TaskDto[]>;
-}
+import { apiFetch } from "./apiFetch";
 
 export async function getJson<TResponse>(path: string): Promise<TResponse> {
   const response = await apiFetch(path);

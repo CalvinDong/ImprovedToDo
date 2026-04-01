@@ -1,8 +1,8 @@
 import { useOutletContext } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTask, tasksQueryOptions } from "./taskQueries";
+import { createTask, deleteTask, setCompleteTask, tasksQueryOptions } from "./taskQueries";
 import TaskCard from "./taskCard.tsx";
-import type { CreateTaskRequest, TaskDto } from "@todo/contracts";
+import type { CreateTaskRequest, TaskDto, SetTaskCompletedRequest, UpdateTaskRequest } from "@todo/contracts";
 
 interface Props {
   list: string;
@@ -52,6 +52,7 @@ const TaskList = ({ list }: Props) => {
                     id: data.clientId, // temp id for React key stability
                     clientId: data.clientId,
                     title: data.title,
+                    completed: false,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                     isOptimistic: true,
@@ -77,12 +78,69 @@ const TaskList = ({ list }: Props) => {
                 : task
             )
             );
+            
+            setSelectedTask(newTask);
         },
 
         /*onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
         },*/
 
+    });
+
+    const setCompleteMutation = useMutation({
+        mutationFn: ({ list, id, completed }: { list: string, id: string, completed: boolean }) =>
+            setCompleteTask(list, id, { completed }),
+
+        onMutate: async ({ list, id, completed }) => {
+            await queryClient.cancelQueries({ queryKey });
+
+            const previousTasks = queryClient.getQueryData<TaskViewModel[]>(queryKey);
+
+            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
+                old.map((task) =>
+                    task.id === id ? { ...task, completed: completed } : task
+                )
+            );
+
+            return { previousTasks };
+        },
+
+        onError: (_error, _variables, context) => {
+            if (context?.previousTasks) {
+            queryClient.setQueryData(queryKey, context.previousTasks);
+            }
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey });
+        },
+    });
+
+    const deleteTaskMutation = useMutation({
+        mutationFn: (taskId: string) => deleteTask(list, taskId),
+
+        onMutate: async (taskId) => {
+            await queryClient.cancelQueries({ queryKey });
+
+            const previousTasks = queryClient.getQueryData<TaskViewModel[]>(queryKey);
+
+            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
+                old.filter((task) => task.id !== taskId)
+            );
+
+            return { previousTasks };
+        },
+
+        onError: (_err, _taskId, context) => {
+            if (context?.previousTasks) {
+            queryClient.setQueryData(queryKey, context.previousTasks);
+            }
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey });
+        },
     });
 
     if (isLoading) {
@@ -97,7 +155,34 @@ const TaskList = ({ list }: Props) => {
         <div className="flex flex-col gap-3">
                 {tasks.map((item) => (
                     <TaskCard key={item.id} onClick={() => setSelectedTask(item)}>
-                        <p className="card-title">{item.title}</p>
+                        <div className="flex justify-between w-full">
+                            <div className="flex gap-3">
+                                <input type="checkbox" checked={item.completed}
+                                    className="
+                                    checkbox
+                                    checked:bg-primary checked:text-primary-content
+                                    "
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) =>
+                                        setCompleteMutation.mutate({
+                                            list: list,
+                                            id: item.id,
+                                            completed: e.target.checked
+                                        })
+                                    }
+                                        
+                                >
+                                </input>
+                                <p className="card-title">{item.title}</p>
+                            </div>
+                            <div>
+                                <button className="btn btn-xs btn-accent" 
+                                    onClick={() => deleteTaskMutation.mutate(item.id)}
+                                    >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
                     </TaskCard>
                 ))}
 
@@ -117,10 +202,11 @@ const TaskList = ({ list }: Props) => {
                                 title: value,
                                 description: null,
                                 listId: ""
-                        }
+                            }
 
-                        createTaskMutation.mutate(response);
-                        e.currentTarget.value = "";
+                            createTaskMutation.mutate(response);
+                            e.currentTarget.value = "";
+
                         }
                     }}
                 />

@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getJson, sendJson } from "./tasksApi";
-import type { TaskDto, CreateTaskRequest } from "@todo/contracts";
+import { deleteRequest, getJson, sendJson } from "../../shared/apiHelper";
+import type { TaskDto, CreateTaskRequest, SetTaskCompletedRequest } from "@todo/contracts";
 
 export const tasksQueryOptions = (list: string) =>
   queryOptions({
@@ -19,4 +19,24 @@ export function createTask(
     data
   );
 }
+
+export function setCompleteTask(
+  list: string,
+  taskId: string,
+  data: SetTaskCompletedRequest,
+): Promise<TaskDto>{
+  return sendJson<SetTaskCompletedRequest, TaskDto>(
+    `${list}/${taskId}/complete`,
+    "PATCH",
+    data,
+  )
+};
+
+export function deleteTask(
+  list: string, 
+  taskId: string
+): Promise<void>{
+  return deleteRequest(`${list}/${taskId}`)
+}
+
 

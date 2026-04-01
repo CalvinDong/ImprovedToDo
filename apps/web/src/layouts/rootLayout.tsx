@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../features/auth/authContext";
+import SelectedTaskPanel from "../features/tasks/selectedTaskPanel";
 import type { TaskDto } from "@todo/contracts";
 
 export type AppShellOutletContext = {
@@ -28,7 +29,7 @@ export default function AppShellLayout() {
 
   const rightOpen = !!selectedTask;
 
-  // 🧠 Drag logic (still px-based)
+  // Drag logic (still px-based)
   useEffect(() => {
     function onMouseMove(e: MouseEvent) {
       if (draggingRef.current === "left") {
@@ -121,30 +122,7 @@ export default function AppShellLayout() {
       >
         <AnimatePresence mode="wait">
           {rightOpen && selectedTask && (
-            <motion.div
-              key={selectedTask.id}
-              initial={{ x: "2rem", opacity: 0 }}
-              animate={{ x: "0rem", opacity: 1 }}
-              exit={{ x: "2rem", opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="flex flex-col h-full p-4"
-            >
-              <div className="mb-4 flex justify-between">
-                <h2 className="text-xl font-semibold">{selectedTask.title}</h2>
-                <button
-                  className="btn btn-sm btn-ghost"
-                  onClick={() => setSelectedTask(null)}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-md font-semibold text-base-content/70">
-                  {selectedTask.description}
-                </p>
-              </div>
-            </motion.div>
+            <SelectedTaskPanel key={selectedTask.id} selectedTask={selectedTask} onClose={() => setSelectedTask(null)}/>
           )}
         </AnimatePresence>
       </motion.aside>
