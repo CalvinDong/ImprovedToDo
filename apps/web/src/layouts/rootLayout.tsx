@@ -6,8 +6,8 @@ import SelectedTaskPanel from "../features/tasks/selectedTaskPanel";
 import type { TaskDto } from "@todo/contracts";
 
 export type AppShellOutletContext = {
-  selectedTask: TaskDto | null;
-  setSelectedTask: React.Dispatch<React.SetStateAction<TaskDto | null>>;
+  selectedTaskId: string | null;
+  setSelectedTaskId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 function pxToRem(px: number) {
@@ -21,13 +21,13 @@ function pxToRem(px: number) {
 export default function AppShellLayout() {
   const [leftWidth, setLeftWidth] = useState(280);
   const [rightWidth, setRightWidth] = useState(360);
-  const [selectedTask, setSelectedTask] = useState<TaskDto | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   const { logout } = useAuth();
 
   const draggingRef = useRef<null | "left" | "right">(null);
 
-  const rightOpen = !!selectedTask;
+  const rightOpen = !!selectedTaskId;
 
   // Drag logic (still px-based)
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function AppShellLayout() {
 
       {/* MAIN PANEL */}
       <motion.main className="min-w-0 overflow-auto bg-base-300 p-6" layout="position" transition={{ type: "spring", stiffness: 320, damping: 32 }} >
-        <Outlet context={{ selectedTask, setSelectedTask } satisfies AppShellOutletContext}  />
+        <Outlet context={{ selectedTaskId, setSelectedTaskId } satisfies AppShellOutletContext}  />
       </motion.main>
 
       {/* RIGHT RESIZER */}
@@ -117,12 +117,12 @@ export default function AppShellLayout() {
       {/* RIGHT PANEL */}
       <motion.aside
         layout
-        className="min-w-0 overflow-hidden border-l border-base-300 bg-base-200"
+        className="min-w-0 overflow-hidden border-l border-base-300 bg-base-200 p-3"
         transition={{ duration: 0.25 }}
       >
         <AnimatePresence mode="wait">
-          {rightOpen && selectedTask && (
-            <SelectedTaskPanel key={selectedTask.id} selectedTask={selectedTask} onClose={() => setSelectedTask(null)}/>
+          {rightOpen && selectedTaskId && (
+            <SelectedTaskPanel key={selectedTaskId} selectedTaskId={selectedTaskId} list={"tasks"} onClose={() => setSelectedTaskId(null)}/>
           )}
         </AnimatePresence>
       </motion.aside>

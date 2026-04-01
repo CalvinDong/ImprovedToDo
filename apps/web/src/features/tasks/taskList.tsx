@@ -1,21 +1,19 @@
 import { useOutletContext } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createTask, deleteTask, setCompleteTask, tasksQueryOptions } from "./taskQueries";
+import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.tsx";
 import TaskCard from "./taskCard.tsx";
+import Checkbox from "./components/checkbox.tsx";
 import type { CreateTaskRequest, TaskDto, SetTaskCompletedRequest, UpdateTaskRequest } from "@todo/contracts";
+import type { TaskViewModel } from "./types.ts";
 
 interface Props {
   list: string;
 }
 
 type AppShellContext = {
-  selectedTask: TaskDto | null;
-  setSelectedTask: React.Dispatch<React.SetStateAction<TaskDto | null>>;
-};
-
-type TaskViewModel = TaskDto & {
-    isOptimistic?: boolean;
-    clientId?: string;
+  selectedTaskId: string | null;
+  setSelectedTaskId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 type CreateTaskMutationInput = CreateTaskRequest & {
@@ -23,9 +21,11 @@ type CreateTaskMutationInput = CreateTaskRequest & {
 };
 
 const TaskList = ({ list }: Props) => {
-    const { setSelectedTask } = useOutletContext<AppShellContext>();
+    const { setSelectedTaskId } = useOutletContext<AppShellContext>();
     const queryClient = useQueryClient();
     const queryKey = ["tasks", list];
+
+    const completeTaskMutation = useCompleteTaskMutation(list);
 
     const {
         data: tasks = [],
@@ -79,41 +79,7 @@ const TaskList = ({ list }: Props) => {
             )
             );
             
-            setSelectedTask(newTask);
-        },
-
-        /*onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["tasks"] });
-        },*/
-
-    });
-
-    const setCompleteMutation = useMutation({
-        mutationFn: ({ list, id, completed }: { list: string, id: string, completed: boolean }) =>
-            setCompleteTask(list, id, { completed }),
-
-        onMutate: async ({ list, id, completed }) => {
-            await queryClient.cancelQueries({ queryKey });
-
-            const previousTasks = queryClient.getQueryData<TaskViewModel[]>(queryKey);
-
-            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
-                old.map((task) =>
-                    task.id === id ? { ...task, completed: completed } : task
-                )
-            );
-
-            return { previousTasks };
-        },
-
-        onError: (_error, _variables, context) => {
-            if (context?.previousTasks) {
-            queryClient.setQueryData(queryKey, context.previousTasks);
-            }
-        },
-
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey });
+            setSelectedTaskId(newTask.id);
         },
     });
 
@@ -154,25 +120,18 @@ const TaskList = ({ list }: Props) => {
     return (
         <div className="flex flex-col gap-3">
                 {tasks.map((item) => (
-                    <TaskCard key={item.id} onClick={() => setSelectedTask(item)}>
+                    <TaskCard key={item.id} onClick={() => setSelectedTaskId(item.id)}>
                         <div className="flex justify-between w-full">
                             <div className="flex gap-3">
-                                <input type="checkbox" checked={item.completed}
-                                    className="
-                                    checkbox
-                                    checked:bg-primary checked:text-primary-content
-                                    "
-                                    onClick={(e) => e.stopPropagation()}
-                                    onChange={(e) =>
-                                        setCompleteMutation.mutate({
-                                            list: list,
+                                <Checkbox
+                                    checked={item.completed}
+                                    onChange={(checked) =>
+                                        completeTaskMutation.mutate({
                                             id: item.id,
-                                            completed: e.target.checked
+                                            completed: { completed: checked },
                                         })
                                     }
-                                        
-                                >
-                                </input>
+                                    />
                                 <p className="card-title">{item.title}</p>
                             </div>
                             <div>
