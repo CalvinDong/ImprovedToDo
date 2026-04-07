@@ -34,6 +34,11 @@ export interface CreateTaskRequest {
 export interface UpdateTaskRequest {
   title?: string
   description?: string | null
+  dueDateSet?: boolean
+  dueDate?: Date
+  completed?: boolean
+  todoListId?: string
+
 }
 
 export interface MoveTaskRequest {

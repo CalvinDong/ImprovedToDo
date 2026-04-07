@@ -121,7 +121,7 @@ const TaskList = ({ list }: Props) => {
         <div className="flex flex-col gap-3">
                 {tasks.map((item) => (
                     <TaskCard key={item.id} onClick={() => setSelectedTaskId(item.id)}>
-                        <div className="flex justify-between w-full">
+                        <div className="flex justify-between items-center w-full">
                             <div className="flex gap-3">
                                 <Checkbox
                                     checked={item.completed}

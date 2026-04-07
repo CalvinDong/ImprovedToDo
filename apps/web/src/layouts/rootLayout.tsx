@@ -3,6 +3,7 @@ import { Outlet, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../features/auth/authContext";
 import SelectedTaskPanel from "../features/tasks/selectedTaskPanel";
+import { PanelEdgeOverlay } from "../features/tasks/components/panelEdgeoverlay";
 import type { TaskDto } from "@todo/contracts";
 
 export type AppShellOutletContext = {
@@ -117,10 +118,12 @@ export default function AppShellLayout() {
       {/* RIGHT PANEL */}
       <motion.aside
         layout
-        className="min-w-0 overflow-hidden border-l border-base-300 bg-base-200 p-3"
+        className="relative min-w-0 overflow-visible border-l border-base-300 bg-base-200 p-3"
         transition={{ duration: 0.25 }}
       >
+       
         <AnimatePresence mode="wait">
+          {/*<PanelEdgeOverlay rightWidth={`${pxToRem(rightWidth -13)}rem`}/>*/}
           {rightOpen && selectedTaskId && (
             <SelectedTaskPanel key={selectedTaskId} selectedTaskId={selectedTaskId} list={"tasks"} onClose={() => setSelectedTaskId(null)}/>
           )}
