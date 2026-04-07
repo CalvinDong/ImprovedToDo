@@ -83,32 +83,6 @@ const TaskList = ({ list }: Props) => {
         },
     });
 
-    const deleteTaskMutation = useMutation({
-        mutationFn: (taskId: string) => deleteTask(list, taskId),
-
-        onMutate: async (taskId) => {
-            await queryClient.cancelQueries({ queryKey });
-
-            const previousTasks = queryClient.getQueryData<TaskViewModel[]>(queryKey);
-
-            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
-                old.filter((task) => task.id !== taskId)
-            );
-
-            return { previousTasks };
-        },
-
-        onError: (_err, _taskId, context) => {
-            if (context?.previousTasks) {
-            queryClient.setQueryData(queryKey, context.previousTasks);
-            }
-        },
-
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey });
-        },
-    });
-
     if (isLoading) {
         return <div>Loading tasks...</div>;
     }
@@ -132,14 +106,7 @@ const TaskList = ({ list }: Props) => {
                                         })
                                     }
                                     />
-                                <p className="card-title">{item.title}</p>
-                            </div>
-                            <div>
-                                <button className="btn btn-xs btn-accent" 
-                                    onClick={() => deleteTaskMutation.mutate(item.id)}
-                                    >
-                                    Delete
-                                </button>
+                                <p className={`card-title hover:cursor-default ${item.completed ? "" : "text-base-content/30 line-through"}`}>{item.title}</p>
                             </div>
                         </div>
                     </TaskCard>
@@ -149,7 +116,7 @@ const TaskList = ({ list }: Props) => {
                 <input
                     type="text"
                     className="input shadow-none h-8 p-0 leading-none border-none bg-transparent w-full
-                                   focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
+                               focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
                     placeholder="Add new task"
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {

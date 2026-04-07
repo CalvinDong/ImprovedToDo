@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import Checkbox from "./components/checkbox.tsx";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { tasksQueryOptions } from "./taskQueries.ts";
 import { useUpdateTaskMutation } from "./hooks/useUpdateTaskMutation.tsx";
+import { useDeleteTaskMutation } from "./hooks/useDeleteTaskMutation.tsx";
 import type { UpdateTaskRequest } from "@todo/contracts";
+
+import Checkbox from "./components/checkbox.tsx";
+import { flushSync } from "react-dom";
 
 interface Props {
   selectedTaskId: string;
@@ -20,12 +23,24 @@ export default function SelectedTaskPanel({
 }: Props) {
   const completeTaskMutation = useCompleteTaskMutation(list);
   const updateTaskMutation = useUpdateTaskMutation(list);
+  const deleteTaskMutation = useDeleteTaskMutation(list);
+
   const { data: tasks = [] } = useQuery(tasksQueryOptions(list));
 
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  const titleRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [title]);
 
   useEffect(() => {
     if (selectedTask) {
@@ -37,6 +52,7 @@ export default function SelectedTaskPanel({
   if (!selectedTask) return null;
 
   const saveTaskEdits = () => {
+    console.log("saveTaskEdits fired");
     if (!selectedTask) return;
 
     const trimmedTitle = title.trim();
@@ -72,7 +88,6 @@ export default function SelectedTaskPanel({
 
   return (
     <motion.div
-      key={selectedTaskId}
       initial={{ x: "2rem", opacity: 0 }}
       animate={{ x: "0rem", opacity: 1 }}
       exit={{ x: "2rem", opacity: 0 }}
@@ -91,23 +106,33 @@ export default function SelectedTaskPanel({
             }}
           />
 
-          <input
+          <textarea
+            ref={titleRef}
+            rows={1}
             value={title}
+            maxLength={200}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={saveTaskEdits}
+            onInput={(e) => {
+                const el = e.currentTarget;
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+                if (e.key === "Enter") {
                 e.currentTarget.blur();
-              }
+                }
 
-              if (e.key === "Escape") {
+                if (e.key === "Escape") {
                 setTitle(selectedTask.title);
                 setDescription(selectedTask.description ?? "");
                 e.currentTarget.blur();
-              }
+                }
             }}
-            className="text-xl font-semibold bg-transparent border-none outline-none w-full"
-          />
+            className={`text-xl font-semibold resize-none overflow-hidden bg-transparent w-full leading-tight p-0 border-0 outline-none shadow-none
+                ${selectedTask.completed ? "" : "text-base-content/30 line-through"}`
+            }
+            />
         </div>
 
         <button className="btn btn-sm btn-ghost" onClick={onClose}>
@@ -117,7 +142,9 @@ export default function SelectedTaskPanel({
 
       <div className="text-md bg-transparent">
         <textarea
-            className="resize-none overflow-hidden whitespace-pre-wrap wrap-break-words outline-none bg-transparent w-full"
+            className={`resize-none overflow-hidden whitespace-pre-wrap wrap-break-words outline-none bg-transparent w-full  
+                        ${selectedTask.completed ? "" : "text-base-content/30"}`
+                      }
             placeholder="Add notes here"
             value={description}
             onInput={(e) => {
@@ -128,6 +155,13 @@ export default function SelectedTaskPanel({
             onChange={(e) => setDescription(e.target.value)}
             onBlur={saveTaskEdits}
             onKeyDown={(e) => {
+
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();       
+                    saveTaskEdits();           
+                    e.currentTarget.blur();    
+                }
+
                 if (e.key === "Escape") {
                 setTitle(selectedTask.title);
                 setDescription(selectedTask.description ?? "");
@@ -136,6 +170,17 @@ export default function SelectedTaskPanel({
             }}
             />
       </div>
+      <button className="btn btn-xs btn-accent" 
+            onClick={() =>{ 
+                const taskId = selectedTask.id
+                flushSync(() => {
+                    onClose();
+                });
+                deleteTaskMutation.mutate(taskId);
+            }}
+            >
+            Delete
+        </button>
     </motion.div>
   );
 }

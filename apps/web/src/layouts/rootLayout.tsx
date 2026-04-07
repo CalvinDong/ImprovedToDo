@@ -122,12 +122,10 @@ export default function AppShellLayout() {
         transition={{ duration: 0.25 }}
       >
        
-        <AnimatePresence mode="wait">
           {/*<PanelEdgeOverlay rightWidth={`${pxToRem(rightWidth -13)}rem`}/>*/}
           {rightOpen && selectedTaskId && (
             <SelectedTaskPanel key={selectedTaskId} selectedTaskId={selectedTaskId} list={"tasks"} onClose={() => setSelectedTaskId(null)}/>
           )}
-        </AnimatePresence>
       </motion.aside>
     </motion.div>
   );
