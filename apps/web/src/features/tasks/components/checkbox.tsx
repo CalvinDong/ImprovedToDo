@@ -10,7 +10,7 @@ export default function Checkbox({ checked, onChange } : Props){
             checked={checked}
             className="
                 checkbox
-                checked:bg-primary checked:text-primary-content
+                checked:bg-primary/80 checked:text-primary-content/40
             "
             onClick={(e) => e.stopPropagation()}
             onChange={(e) => onChange(e.target.checked)}

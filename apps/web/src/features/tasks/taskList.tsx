@@ -1,9 +1,11 @@
 import { useOutletContext } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createTask, deleteTask, setCompleteTask, tasksQueryOptions } from "./taskQueries";
-import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.tsx";
+import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
+
 import TaskCard from "./taskCard.tsx";
 import Checkbox from "./components/checkbox.tsx";
+
 import type { CreateTaskRequest, TaskDto, SetTaskCompletedRequest, UpdateTaskRequest } from "@todo/contracts";
 import type { TaskViewModel } from "./types.ts";
 
@@ -95,8 +97,8 @@ const TaskList = ({ list }: Props) => {
         <div className="flex flex-col gap-3">
                 {tasks.map((item) => (
                     <TaskCard key={item.id} onClick={() => setSelectedTaskId(item.id)}>
-                        <div className="flex justify-between items-center w-full">
-                            <div className="flex gap-3">
+                        <div className="flex justify-between items-center w-full min-w-0">
+                            <div className="flex gap-3 min-w-0">
                                 <Checkbox
                                     checked={item.completed}
                                     onChange={(checked) =>
@@ -106,7 +108,11 @@ const TaskList = ({ list }: Props) => {
                                         })
                                     }
                                     />
-                                <p className={`card-title hover:cursor-default ${item.completed ? "" : "text-base-content/30 line-through"}`}>{item.title}</p>
+                                <p className={`card-title hover:cursor-default break-all whitespace-pre-wrap 
+                                               ${item.completed ? "text-base-content/30 line-through" : ""}`}
+                                               >
+                                    {item.title}
+                                </p>
                             </div>
                         </div>
                     </TaskCard>
@@ -118,6 +124,7 @@ const TaskList = ({ list }: Props) => {
                     className="input shadow-none h-8 p-0 leading-none border-none bg-transparent w-full
                                focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
                     placeholder="Add new task"
+                    maxLength={100}
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {

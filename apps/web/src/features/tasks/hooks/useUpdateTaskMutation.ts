@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateTask } from "../taskQueries";
+
 import type { TaskViewModel, UpdateTaskMutationInput } from "../types";
-import type { UpdateTaskRequest } from "@todo/contracts";
 
 export function useUpdateTaskMutation(list: string){
     const queryClient = useQueryClient();
