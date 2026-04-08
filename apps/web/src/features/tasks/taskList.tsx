@@ -1,33 +1,62 @@
 import { useOutletContext } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTask, deleteTask, setCompleteTask, tasksQueryOptions } from "./taskQueries";
+import { useQuery } from "@tanstack/react-query";
+import { tasksQueryOptions } from "./taskQueries";
 import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
+import { useCreateTaskMutation } from "./hooks/useCreateTaskMutation.ts";
 
 import TaskCard from "./taskCard.tsx";
 import Checkbox from "./components/checkbox.tsx";
 
-import type { CreateTaskRequest, TaskDto, SetTaskCompletedRequest, UpdateTaskRequest } from "@todo/contracts";
-import type { TaskViewModel } from "./types.ts";
+import type { CreateTaskMutationInput, TaskViewModel } from "./types.ts";
+import type { AppShellOutletContext } from "./types.ts";
+import type { TaskDto } from "@todo/contracts";
 
 interface Props {
   list: string;
 }
 
-type AppShellContext = {
-  selectedTaskId: string | null;
-  setSelectedTaskId: React.Dispatch<React.SetStateAction<string | null>>;
-};
-
-type CreateTaskMutationInput = CreateTaskRequest & {
-  clientId: string;
-};
-
 const TaskList = ({ list }: Props) => {
-    const { setSelectedTaskId } = useOutletContext<AppShellContext>();
-    const queryClient = useQueryClient();
-    const queryKey = ["tasks", list];
+    const { setSelectedTaskId, setSelectedTaskPanelKey } = useOutletContext<AppShellOutletContext>();
 
     const completeTaskMutation = useCompleteTaskMutation(list);
+    const createTaskMutation = useCreateTaskMutation(list);
+
+    const handleSubmit = (title: string, openPanel: boolean) => {
+        const trimmed = title.trim();
+        if (!trimmed) return;
+
+        const response: CreateTaskMutationInput = {
+            clientId: crypto.randomUUID(),
+            title: title,
+            description: null,
+            listId: ""
+        }
+
+        if (openPanel) {
+            setSelectedTaskId(response.clientId);
+            setSelectedTaskPanelKey(response.clientId)
+        }
+
+        createTaskMutation.mutate(response, {
+            onSuccess: (newTask, _variables, context) => {
+                if (openPanel) {
+                    setSelectedTaskId((current) =>
+                        current === context?.clientId ? newTask.id : current
+                    );
+                }
+            },
+            onError: (_error, _variables, context) => {
+                if (openPanel) {
+                        setSelectedTaskId((current) =>
+                        current === context?.clientId ? null : current
+                    );
+                        setSelectedTaskPanelKey((current) =>
+                        current === context?.clientId ? null : current
+                    );
+                }
+            },
+        });
+    };
 
     const {
         data: tasks = [],
@@ -35,55 +64,6 @@ const TaskList = ({ list }: Props) => {
         isError,
         error,
     } = useQuery(tasksQueryOptions(list));
-
-    const createTaskMutation = useMutation({
-        mutationFn: async ({ clientId: _clientId, ...data }: CreateTaskMutationInput) => {
-            //await new Promise((r) => setTimeout(r, 2000));
-            return createTask(list, data);
-        },
-            
-
-        onMutate: async (data) => {
-            await queryClient.cancelQueries({ queryKey });
-
-            const previousTasks = queryClient.getQueryData<TaskViewModel[]>(queryKey);
-
-            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) => [
-                ...old,
-                {
-                    id: data.clientId, // temp id for React key stability
-                    clientId: data.clientId,
-                    title: data.title,
-                    completed: false,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    isOptimistic: true,
-                },
-            ]);
-
-            return { previousTasks, clientId: data.clientId };
-        },
-
-        onError: (_err, _newTask, context) => {
-            if (context?.previousTasks) {
-            queryClient.setQueryData(queryKey, context.previousTasks);
-            }
-        },
-
-        onSuccess: (newTask, _variables, context) => {
-            if (!context?.clientId) return;
-
-            queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
-            old.map((task) =>
-                task.clientId === context.clientId
-                ? newTask
-                : task
-            )
-            );
-            
-            setSelectedTaskId(newTask.id);
-        },
-    });
 
     if (isLoading) {
         return <div>Loading tasks...</div>;
@@ -99,7 +79,10 @@ const TaskList = ({ list }: Props) => {
                     <TaskCard
                         key={item.id}
                         completed={item.completed}
-                        onClick={() => setSelectedTaskId(item.id)}
+                        onClick={() => {
+                            setSelectedTaskId(item.id)
+                            setSelectedTaskPanelKey(item.clientId ?? item.id);
+                        }}
                     >
                         <div className="flex w-full min-w-0">
                             <div className="flex flex-1 min-w-0 items-center gap-3">
@@ -108,8 +91,8 @@ const TaskList = ({ list }: Props) => {
                                     checked={item.completed}
                                     onChange={(checked) =>
                                         completeTaskMutation.mutate({
-                                        id: item.id,
-                                        completed: { completed: checked },
+                                            id: item.id,
+                                            completed: { completed: checked },
                                         })
                                     }
                                     />
@@ -139,14 +122,8 @@ const TaskList = ({ list }: Props) => {
                         if (e.key === "Enter") {
                             const value = e.currentTarget.value.trim();
                             if (!value) return;
-                            const response: CreateTaskMutationInput = {
-                                clientId: crypto.randomUUID(),
-                                title: value,
-                                description: null,
-                                listId: ""
-                            }
-
-                            createTaskMutation.mutate(response);
+                            handleSubmit(value, e.shiftKey);
+                            //createTaskMutation.mutate(response);
                             e.currentTarget.value = "";
 
                         }

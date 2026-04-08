@@ -4,12 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../features/auth/authContext";
 import SelectedTaskPanel from "../features/tasks/selectedTaskPanel";
 import { PanelEdgeOverlay } from "../features/tasks/components/panelEdgeoverlay";
-import type { TaskDto } from "@todo/contracts";
-
-export type AppShellOutletContext = {
-  selectedTaskId: string | null;
-  setSelectedTaskId: React.Dispatch<React.SetStateAction<string | null>>;
-};
+import type { AppShellOutletContext } from "../features/tasks/types";
 
 function pxToRem(px: number) {
   const rootFontSize = parseFloat(
@@ -23,6 +18,7 @@ export default function AppShellLayout() {
   const [leftWidth, setLeftWidth] = useState(280);
   const [rightWidth, setRightWidth] = useState(360);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskPanelKey, setSelectedTaskPanelKey] = useState<string | null>(null);
 
   const { logout } = useAuth();
 
@@ -100,7 +96,7 @@ export default function AppShellLayout() {
 
       {/* MAIN PANEL */}
       <motion.main className="min-w-0 overflow-auto bg-base-300 p-6" layout="position" transition={{ type: "spring", stiffness: 320, damping: 32 }} >
-        <Outlet context={{ selectedTaskId, setSelectedTaskId } satisfies AppShellOutletContext}  />
+        <Outlet context={{ selectedTaskId, setSelectedTaskId, selectedTaskPanelKey, setSelectedTaskPanelKey } satisfies AppShellOutletContext}  />
       </motion.main>
 
       {/* RIGHT RESIZER */}
@@ -123,8 +119,15 @@ export default function AppShellLayout() {
       >
        
           {/*<PanelEdgeOverlay rightWidth={`${pxToRem(rightWidth -13)}rem`}/>*/}
-          {rightOpen && selectedTaskId && (
-            <SelectedTaskPanel key={selectedTaskId} selectedTaskId={selectedTaskId} list={"tasks"} onClose={() => setSelectedTaskId(null)}/>
+          {rightOpen && selectedTaskId && selectedTaskPanelKey && (
+            <SelectedTaskPanel 
+              key={selectedTaskPanelKey} 
+              selectedTaskId={selectedTaskId} 
+              list={"tasks"} 
+              onClose={() => {
+                setSelectedTaskId(null)
+                setSelectedTaskPanelKey(null);
+              }}/>
           )}
       </motion.aside>
     </motion.div>

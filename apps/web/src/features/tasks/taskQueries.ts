@@ -1,11 +1,21 @@
 import { queryOptions } from "@tanstack/react-query";
 import { deleteRequest, getJson, sendJson } from "../../shared/apiHelper";
 import type { TaskDto, CreateTaskRequest, UpdateTaskRequest , SetTaskCompletedRequest } from "@todo/contracts";
+import type { TaskViewModel } from "./types";
+
+function toTaskViewModel(task: TaskDto): TaskViewModel {
+  return {
+    ...task,
+  };
+}
 
 export const tasksQueryOptions = (list: string) =>
   queryOptions({
     queryKey: ["tasks", list],
-    queryFn: () => getJson<TaskDto[]>(list),
+    queryFn: async (): Promise<TaskViewModel[]> => {
+      const tasks = await getJson<TaskDto[]>(list);
+      return tasks.map(toTaskViewModel);
+    },
     staleTime: 1000 * 60,
   });
 
