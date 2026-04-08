@@ -96,21 +96,30 @@ const TaskList = ({ list }: Props) => {
     return (
         <div className="flex flex-col gap-3">
                 {tasks.map((item) => (
-                    <TaskCard key={item.id} onClick={() => setSelectedTaskId(item.id)}>
-                        <div className="flex justify-between items-center w-full min-w-0">
-                            <div className="flex gap-3 min-w-0">
-                                <Checkbox
+                    <TaskCard
+                        key={item.id}
+                        completed={item.completed}
+                        onClick={() => setSelectedTaskId(item.id)}
+                    >
+                        <div className="flex w-full min-w-0">
+                            <div className="flex flex-1 min-w-0 items-center gap-3">
+                                <div className="shrink-0 self-center">
+                                    <Checkbox
                                     checked={item.completed}
                                     onChange={(checked) =>
                                         completeTaskMutation.mutate({
-                                            id: item.id,
-                                            completed: { completed: checked },
+                                        id: item.id,
+                                        completed: { completed: checked },
                                         })
                                     }
                                     />
-                                <p className={`card-title hover:cursor-default break-all whitespace-pre-wrap 
-                                               ${item.completed ? "text-base-content/30 line-through" : ""}`}
-                                               >
+                                </div>
+
+                                <p
+                                    className={`card-title flex-1 min-w-0 hover:cursor-default whitespace-pre-wrap break-all leading-tight ${
+                                    item.completed ? "text-base-content/50 line-through" : ""
+                                    }`}
+                                >
                                     {item.title}
                                 </p>
                             </div>
@@ -121,7 +130,7 @@ const TaskList = ({ list }: Props) => {
                 <TaskCard>
                 <input
                     type="text"
-                    className="input shadow-none h-8 p-0 leading-none border-none bg-transparent w-full
+                    className="input shadow-none p-0 leading-none border-none bg-transparent w-full break-all
                                focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
                     placeholder="Add new task"
                     maxLength={100}

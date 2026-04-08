@@ -131,7 +131,7 @@ export default function SelectedTaskPanel({
                         }
                     }}
                     className={`text-xl font-semibold wrap-break-word min-w-0 resize-none overflow-hidden bg-transparent w-full leading-tight p-0 border-0 outline-none shadow-none
-                        ${selectedTask.completed ? "text-base-content/30 line-through" : ""}`
+                        ${selectedTask.completed ? "text-base-content/50 line-through" : ""}`
                     }
                     />
                 </div>
@@ -146,7 +146,7 @@ export default function SelectedTaskPanel({
         <div className="text-md bg-transparent">
             <textarea
                 className={`font-normal resize-none overflow-hidden whitespace-pre-wrap wrap-break-words outline-none bg-transparent w-full  
-                            ${selectedTask.completed ? "text-base-content/30" : ""}`
+                            ${selectedTask.completed ? "text-base-content/50" : ""}`
                         }
                 ref={descriptionRef}
                 placeholder="Add notes here"
