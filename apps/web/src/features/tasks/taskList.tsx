@@ -1,22 +1,23 @@
 import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { tasksQueryOptions } from "./taskQueries";
+import { useSortable } from '@dnd-kit/react/sortable';
 import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
 import { useCreateTaskMutation } from "./hooks/useCreateTaskMutation.ts";
 
 import TaskCard from "./taskCard.tsx";
 import Checkbox from "./components/checkbox.tsx";
 
-import type { CreateTaskMutationInput, TaskViewModel } from "./types.ts";
+import type { CreateTaskMutationInput } from "./types.ts";
 import type { AppShellOutletContext } from "./types.ts";
-import type { TaskDto } from "@todo/contracts";
+import { useRef } from "react";
 
 interface Props {
   list: string;
 }
 
 const TaskList = ({ list }: Props) => {
-    const { setSelectedTaskId, setSelectedTaskPanelKey } = useOutletContext<AppShellOutletContext>();
+    const { setSelectedTaskId, selectedTaskId, setSelectedTaskPanelKey, selectedTaskPanelKey } = useOutletContext<AppShellOutletContext>();
 
     const completeTaskMutation = useCompleteTaskMutation(list);
     const createTaskMutation = useCreateTaskMutation(list);
@@ -58,6 +59,24 @@ const TaskList = ({ list }: Props) => {
         });
     };
 
+    function openPanel(id: string, clientId?: string){
+        if (id === selectedTaskId || clientId === selectedTaskPanelKey){
+            setSelectedTaskId(null);
+            setSelectedTaskPanelKey(null);
+            return;
+        }
+
+        setSelectedTaskId(id)
+        setSelectedTaskPanelKey(clientId ?? id);
+
+    }
+
+    function Sortable({}){
+
+        const handleRef = useRef<HTMLButtonElement | null>(null);
+        //const {isDragging} = useSortable({id, index, element, handle: handleRef});
+    }
+
     const {
         data: tasks = [],
         isLoading,
@@ -74,15 +93,19 @@ const TaskList = ({ list }: Props) => {
     }
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="h-full" onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          setSelectedTaskId(null)
+          setSelectedTaskPanelKey(null)
+        }
+      }}>
+
+            <div className="flex flex-col gap-3">
                 {tasks.map((item) => (
                     <TaskCard
                         key={item.id}
                         completed={item.completed}
-                        onClick={() => {
-                            setSelectedTaskId(item.id)
-                            setSelectedTaskPanelKey(item.clientId ?? item.id);
-                        }}
+                        onClick={() => { openPanel(item.id, item.clientId) }}
                     >
                         <div className="flex w-full min-w-0">
                             <div className="flex flex-1 min-w-0 items-center gap-3">
@@ -145,6 +168,7 @@ const TaskList = ({ list }: Props) => {
                    }
                 */}
             </div>
+        </div>
     );
 };
 

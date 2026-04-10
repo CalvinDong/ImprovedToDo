@@ -54,6 +54,11 @@ export default function AppShellLayout() {
     };
   }, []);
 
+  function closePanel(){
+    setSelectedTaskId(null)
+    setSelectedTaskPanelKey(null);
+  }
+
   function startDragging(side: "left" | "right") {
     draggingRef.current = side;
     document.body.style.cursor = "col-resize";
@@ -76,8 +81,8 @@ export default function AppShellLayout() {
       style={{ gridTemplateColumns: templateColumns }}
     >
       {/* LEFT PANEL */}
-      <aside className="min-w-0 overflow-hidden border-base-300 bg-base-100 p-4">
-        <div className="flex flex-col">
+      <aside className="min-w-0 overflow-hidden border-base-300 bg-base-100 p-4" onMouseDown={closePanel}>
+        <div className="flex flex-col" onMouseDown={(e) => e.stopPropagation()}>
               <Link to="/" className="my-1.5">Home</Link>
               <Link to="/the-day" className="my-1.5">The Day</Link>
               <Link to="/profile" className="my-1.5">Profile</Link>
@@ -95,7 +100,11 @@ export default function AppShellLayout() {
       />
 
       {/* MAIN PANEL */}
-      <motion.main className="min-w-0 overflow-auto bg-base-300 p-6" layout="position" transition={{ type: "spring", stiffness: 320, damping: 32 }} >
+      <motion.main 
+        className="min-w-0 overflow-auto bg-base-300" 
+        layout="position"
+        transition={{ type: "spring", stiffness: 320, damping: 32 }} 
+      >
         <Outlet context={{ selectedTaskId, setSelectedTaskId, selectedTaskPanelKey, setSelectedTaskPanelKey } satisfies AppShellOutletContext}  />
       </motion.main>
 
@@ -125,8 +134,7 @@ export default function AppShellLayout() {
               selectedTaskId={selectedTaskId} 
               list={"tasks"} 
               onClose={() => {
-                setSelectedTaskId(null)
-                setSelectedTaskPanelKey(null);
+                closePanel()
               }}/>
           )}
       </motion.aside>
