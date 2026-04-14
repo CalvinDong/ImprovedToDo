@@ -21,8 +21,8 @@ export interface TaskDto {
   tags?: TagDto[]
   connectedTaskIds?: string[]
   subtasks?: SubTaskDto[]
-  createdAt: string
-  updatedAt: string
+  createdAtUtc: string
+  updatedAtUtc: string
 }
 
 export interface CreateTaskRequest {

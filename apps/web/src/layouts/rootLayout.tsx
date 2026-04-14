@@ -77,7 +77,7 @@ export default function AppShellLayout() {
     <motion.div
       layout
       transition={{ type: "spring", stiffness: 320, damping: 32 }}
-      className="grid h-screen overflow-hidden bg-base-100"
+      className="grid h-screen overflow-hidden bg-base-200"
       style={{ gridTemplateColumns: templateColumns }}
     >
       {/* LEFT PANEL */}
@@ -95,7 +95,7 @@ export default function AppShellLayout() {
 
       {/* LEFT RESIZER */}
       <div
-        className="cursor-col-resize border-none box-shadow-xl hover:bg-primary transition-colors"
+        className="cursor-col-resize border-none box-shadow-xl bg-base-300 hover:bg-primary transition-colors"
         onMouseDown={() => startDragging("left")}
       />
 
