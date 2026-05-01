@@ -17,7 +17,7 @@ export interface TaskDto {
   description?: string | null
   completed: boolean
   listId?: string
-  order?: number
+  lexoRank: string
   tags?: TagDto[]
   connectedTaskIds?: string[]
   subtasks?: SubTaskDto[]
@@ -29,6 +29,7 @@ export interface CreateTaskRequest {
   title: string
   description?: string | null
   listId?: string
+  lexoRank: string
 }
 
 export interface UpdateTaskRequest {

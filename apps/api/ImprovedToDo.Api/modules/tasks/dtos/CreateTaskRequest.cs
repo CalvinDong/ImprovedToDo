@@ -9,7 +9,7 @@ public sealed class CreateTaskRequest
     public string? Description { get; set; }
     public DateTimeOffset? DueDate { get; set; }
     public Guid? TodoListId { get; set; }
-    public int? Position { get; set; }
+    public string LexoRank { get; set; }
 }
 
 public class CreateTaskValidator : AbstractValidator<CreateTaskRequest>
@@ -21,9 +21,8 @@ public class CreateTaskValidator : AbstractValidator<CreateTaskRequest>
             .MaximumLength(200);
         RuleFor(x => x.Description)
             .MaximumLength(2000);
-        RuleFor(x => x.Position)
-            .GreaterThanOrEqualTo(0)
-            .When(x => x.Position.HasValue);
+        RuleFor(x => x.LexoRank)
+            .NotNull();
     }
 }
 
@@ -58,7 +57,7 @@ public sealed class SetTaskCompleteRequest
 
 public sealed class UpdateTaskPositionRequest
 {
-    public int Position { get; set; }
+    public string LexoRank { get; set; }
     public Guid? TodoListId { get; set; }
 }
 
@@ -77,7 +76,7 @@ public sealed class TaskResponse
     public bool Completed { get; set; }
     public DateTimeOffset? DueDate { get; set; }
     public Guid? TodoListId { get; set; }
-    public int Position { get; set; }
+    public string LexoRank { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset? UpdatedAtUtc { get; set; }
 
@@ -90,7 +89,7 @@ public sealed class TaskResponse
             Completed = task.Completed,
             DueDate = task.DueDate,
             TodoListId = task.TodoListId,
-            Position = task.Position,
+            LexoRank = task.LexoRank,
             CreatedAtUtc = task.CreatedAt,
             UpdatedAtUtc = task.UpdatedAt
         };
@@ -105,7 +104,7 @@ public sealed class TaskResponse
             Completed = task.Completed,
             DueDate = task.DueDate,
             TodoListId = task.TodoListId,
-            Position = task.Position,
+            LexoRank = task.LexoRank,
             CreatedAtUtc = task.CreatedAt,
             UpdatedAtUtc = task.UpdatedAt
         };

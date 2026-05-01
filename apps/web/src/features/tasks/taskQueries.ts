@@ -3,9 +3,10 @@ import { deleteRequest, getJson, sendJson } from "../../shared/apiHelper";
 import type { TaskDto, CreateTaskRequest, UpdateTaskRequest , SetTaskCompletedRequest } from "@todo/contracts";
 import type { TaskViewModel } from "./types";
 
-function toTaskViewModel(task: TaskDto): TaskViewModel {
+function toTaskViewModel(task: TaskDto, order: number): TaskViewModel {
   return {
     ...task,
+    //position: order
   };
 }
 
@@ -15,6 +16,17 @@ export const tasksQueryOptions = (list: string) =>
     queryFn: async (): Promise<TaskViewModel[]> => {
       const tasks = await getJson<TaskDto[]>(list);
       return tasks.map(toTaskViewModel);
+      /*const sortedTasks = [...tasks].sort((a, b) => {
+        if (a.lexoRank < b.lexoRank) return -1;
+        if (a.lexoRank > b.lexoRank) return 1;
+        return 0;
+      });*/
+      /*return sortedTasks.map((item, index) => {
+        let result = toTaskViewModel(item, index);
+        console.log(result);
+        return result;
+        return toTaskViewModel(item, index);*/
+      //});
     },
     staleTime: 1000 * 60,
   });

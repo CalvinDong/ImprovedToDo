@@ -3,6 +3,6 @@ import type { TaskDto } from "./task"
 export interface TaskListDto {
   id: string
   title: string
-  order: number
+  lexoRank: string
   tasks: TaskDto[]
 }

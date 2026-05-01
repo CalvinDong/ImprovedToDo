@@ -30,7 +30,7 @@ public class TaskService : ITaskService
             TodoListId = request.TodoListId,
             Title = request.Title,
             Description = request.Description,
-            Position = request.Position ?? 0,
+            LexoRank = request.LexoRank,
             Completed = false,
             DueDate = request.DueDate,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -68,7 +68,7 @@ public class TaskService : ITaskService
                                                (x.Description != null && x.Description.Contains(query.Search)));
         
         return await tasksQuery
-            .OrderBy(x => x.Position)
+            .OrderBy(x => x.LexoRank)
             .ThenBy(x => x.CreatedAt)
             .Select(TaskResponse.Projection)
             .ToListAsync(ct);
@@ -183,7 +183,7 @@ public class TaskService : ITaskService
         if (task is null)
             throw new NotFoundException("Task not found.");
 
-        task.Position = request.Position;
+        task.LexoRank = request.LexoRank;
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
         try

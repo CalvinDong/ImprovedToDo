@@ -4,13 +4,17 @@ import { tasksQueryOptions } from "./taskQueries";
 import { useSortable } from '@dnd-kit/react/sortable';
 import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
 import { useCreateTaskMutation } from "./hooks/useCreateTaskMutation.ts";
+import { LexoRank } from "./lexoRank.ts";
 
 import TaskCard from "./taskCard.tsx";
 import Checkbox from "./components/checkbox.tsx";
+import SortDropdown from "./components/sortDropdown.tsx";
 
 import type { CreateTaskMutationInput, TaskViewModel } from "./types.ts";
 import type { AppShellOutletContext } from "./types.ts";
-import { useEffect, useRef, useState } from "react";
+import type { SortState } from "./types.ts";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Props {
   list: string;
@@ -18,16 +22,29 @@ interface Props {
 
 type SortableProps = {
   item: TaskViewModel;
-  index?: number;
+  index: number;
 };
 
 const TaskList = ({ list }: Props) => {
     const { setSelectedTaskId, selectedTaskId, setSelectedTaskPanelKey, selectedTaskPanelKey } = useOutletContext<AppShellOutletContext>();
+    const sortOptions = [
+        { value: "created", label: "Created date", supportsDirection: true },
+        { value: "edited", label: "Edited date", supportsDirection: true },
+        { value: "alphabetical", label: "Alphabetical", supportsDirection: true },
+        { value: "tags", label: "Tags", supportsDirection: true },
+        { value: "custom", label: "Custom order", supportsDirection: false },
+    ] as const;
+
+    type TaskSortField = (typeof sortOptions)[number]["value"];
+    const [sort, setSort] = useState<SortState<TaskSortField>>({
+        field: "custom",
+        direction: "asc",
+    });
 
     const completeTaskMutation = useCompleteTaskMutation(list);
     const createTaskMutation = useCreateTaskMutation(list);
 
-    const handleSubmit = (title: string, openPanel: boolean) => {
+    const handleSubmit = (title: string, openPanel: boolean, listLength: number) => {
         const trimmed = title.trim();
         if (!trimmed) return;
 
@@ -35,7 +52,8 @@ const TaskList = ({ list }: Props) => {
             clientId: crypto.randomUUID(),
             title: title,
             description: null,
-            listId: ""
+            listId: "",
+            lexoRank: LexoRank.between(tasks[tasks.length - 1].lexoRank)
         }
 
         if (openPanel) {
@@ -50,6 +68,7 @@ const TaskList = ({ list }: Props) => {
                         current === context?.clientId ? newTask.id : current
                     );
                 }
+                tasks.concat(newTask);
             },
             onError: (_error, _variables, context) => {
                 if (openPanel) {
@@ -79,13 +98,10 @@ const TaskList = ({ list }: Props) => {
     function Sortable({ item, index }: SortableProps) {
         const [element, setElement] = useState<Element | null>(null);
         const handleRef = useRef<HTMLButtonElement | null>(null);
-        if (item.order === undefined){
-            item.order = Math.floor(Math.random() * (999 - 0 + 1)) + 0;
-        }
 
         const { isDragging } = useSortable({
             id: item.id,
-            index: item.order,
+            index,
             element,
             handle: handleRef,
         });
@@ -140,7 +156,7 @@ const TaskList = ({ list }: Props) => {
     } = useQuery(tasksQueryOptions(list));
 
     //tasks.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    let counter = 0;
+    /*let counter = 0; # convert this to a check that ensures that every task has a position number assigned so dnd kit doesn't break
     const newTasks = tasks.map((item) => {
         const updated = {
             ...item,
@@ -150,7 +166,40 @@ const TaskList = ({ list }: Props) => {
         counter += 1;
 
         return updated
-    })
+    })*/ 
+
+    const sortedTasks = useMemo(() => {
+        const tasksCopy = [...tasks];
+
+        switch(sort.field){
+            case "created":
+                tasksCopy.sort((a, b) => {
+                    const aTime = new Date(a.createdAtUtc).getTime();
+                    const bTime = new Date(b.createdAtUtc).getTime();
+                    return sort.direction === "asc" ? aTime - bTime : bTime - aTime;
+                });
+                break;
+
+            case "edited":
+                tasksCopy.sort((a, b) => {
+                    const aTime = new Date(a.updatedAtUtc).getTime();
+                    const bTime = new Date(b.updatedAtUtc).getTime();
+                    return sort.direction === "asc" ? aTime - bTime : bTime - aTime;
+                });
+                break;
+                
+            case "alphabetical":
+                tasksCopy.sort((a, b) => {
+                    const result = a.title.localeCompare(b.title);
+                    return sort.direction === "asc" ? result : -result
+                });
+                break;
+
+            case "custom":
+                break;
+        }
+        return tasksCopy;
+    }, [tasks, sort])
 
     if (isLoading) {
         return <div>Loading tasks...</div>;
@@ -161,53 +210,54 @@ const TaskList = ({ list }: Props) => {
     }
 
     return (
-        <div className="h-full" onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
-                setSelectedTaskId(null)
-                setSelectedTaskPanelKey(null)
-            }
-        }}>
-            <div className="flex flex-col gap-3 mb-3">
-                {newTasks.map((item) => (
-                    <Sortable key={item.id} item={item} index={item.order} />
-                ))}
-
-                <TaskCard>
-                <input
-                    type="text"
-                    className="input shadow-none p-0 leading-none border-none bg-transparent w-full break-all
-                               focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
-                    placeholder="Add new task"
-                    maxLength={100}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                            const value = e.currentTarget.value.trim();
-                            if (!value) return;
-                            handleSubmit(value, e.shiftKey);
-                            //createTaskMutation.mutate(response);
-                            e.currentTarget.value = "";
-
-                        }
-                    }}
+    <AnimatePresence mode="popLayout">
+    <div className="h-full">
+        <div
+            className="flex flex-col gap-3 mb-3 min-h-full"
+            onMouseDown={(e) => {
+                /*if (e.target === e.currentTarget) {
+                setSelectedTaskId(null);
+                setSelectedTaskPanelKey(null);
+                }*/
+            }}
+        >
+            <div className="flex items-center justify-between sticky top-0 z-50 bg-base-300">
+                <h1 className="text-4xl font-bold">The Day</h1>
+                <SortDropdown
+                    options={sortOptions}
+                    sort={sort}
+                    onSortChange={setSort}
                 />
-                </TaskCard>
-
-                {/* Explanation for div card height and padding above
-                   h-16 = 4rem (total card height)
-                   p-4 top + bottom = 2rem total 
-                   remaining space = 2rem
-
-                   input h-8 = 2rem
-
-                   {
-                    top pad (1 rem)
-                    empty content area (2 rem)
-                    bottom pad (1 rem)
-                   }
-                */}
             </div>
+
+            {sortedTasks.map((item, index) => (
+                <motion.div key={item.clientId ?? item.id} layout  transition={{ duration: 0.2 }}>
+                    <Sortable key={item.id} item={item} index={index} />
+                </motion.div>
+            ))}
+
+            <TaskCard>
+                <input
+                type="text"
+                className="input shadow-none p-0 leading-none border-none bg-transparent w-full break-all
+                            focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
+                placeholder="Add new task"
+                maxLength={100}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                    const value = e.currentTarget.value.trim();
+                    if (!value) return;
+                    handleSubmit(value, e.shiftKey, tasks.length);
+                    e.currentTarget.value = "";
+                    }
+                }}
+                />
+            </TaskCard>
         </div>
+        <button className="btn" onClick={() => console.log(tasks)}></button>
+    </div>
+     </AnimatePresence>
     );
 };
 

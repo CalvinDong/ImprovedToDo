@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTask } from "../taskQueries";
 import type { CreateTaskMutationInput, TaskViewModel } from "../types";
 import { delay } from "framer-motion";
+import type { LexoRank } from "../lexoRank";
 
 type CreateTaskContext = {
   previousTasks?: TaskViewModel[];
@@ -46,9 +47,11 @@ export function useCreateTaskMutation(
           clientId: data.clientId,
           title: data.title,
           completed: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAtUtc: new Date().toISOString(),
+          updatedAtUtc: new Date().toISOString(),
           isOptimistic: true,
+          lexoRank: data.lexoRank,
+          position: old.length
         },
       ]);
 
@@ -76,7 +79,7 @@ export function useCreateTaskMutation(
       queryClient.setQueryData<TaskViewModel[]>(queryKey, (old = []) =>
         old.map((task) =>
           task.clientId === context.clientId
-            ? { ...newTask, clientId: context.clientId }
+            ? { ...newTask, clientId: context.clientId, position: old.length }
             : task
         )
       );

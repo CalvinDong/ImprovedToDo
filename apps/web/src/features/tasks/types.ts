@@ -20,3 +20,17 @@ export type AppShellOutletContext = {
   selectedTaskPanelKey: string | null;
   setSelectedTaskPanelKey: React.Dispatch<React.SetStateAction<string | null>>;
 };
+
+
+export type SortDirection = "asc" | "desc";
+
+export type SortOption<T extends string> = {
+  value: T;
+  label: string;
+  supportsDirection?: boolean;
+};
+
+export type SortState<T extends string> = {
+  field: T;
+  direction: SortDirection;
+};
