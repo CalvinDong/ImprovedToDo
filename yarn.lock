@@ -220,6 +220,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dnd-kit/abstract@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@dnd-kit/abstract@npm:0.4.0"
+  dependencies:
+    "@dnd-kit/geometry": "npm:^0.4.0"
+    "@dnd-kit/state": "npm:^0.4.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/aabe218c13e371f2760a3620b71a69b863af77ceb1b147515abef0ed9078f83bc37ae600cad98db6884d9f445c5b8cf9b8cbe4a381ce43aaf886b53a640895a6
+  languageName: node
+  linkType: hard
+
 "@dnd-kit/collision@npm:^0.3.2":
   version: 0.3.2
   resolution: "@dnd-kit/collision@npm:0.3.2"
@@ -254,6 +265,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dnd-kit/geometry@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@dnd-kit/geometry@npm:0.4.0"
+  dependencies:
+    "@dnd-kit/state": "npm:^0.4.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/1a3e5eb87c3ffc6927a6a91b0a776c638a75bb1a267c69de096096875f39557023ffd423243a763198c421fceed09d939ae7570c3cbadabdd5d75d7ec7b460e7
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/helpers@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@dnd-kit/helpers@npm:0.4.0"
+  dependencies:
+    "@dnd-kit/abstract": "npm:^0.4.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/9540eebcbc7ef64e90e6a5870b3d02a0934963a2bf9c699ad363f46f1067becb8a5d70d85fbcc24e8f4a2e8a20ae2d2a2fbb6f38f93492f680f14daeb99785d8
+  languageName: node
+  linkType: hard
+
 "@dnd-kit/react@npm:^0.3.2":
   version: 0.3.2
   resolution: "@dnd-kit/react@npm:0.3.2"
@@ -276,6 +307,16 @@ __metadata:
     "@preact/signals-core": "npm:^1.10.0"
     tslib: "npm:^2.6.2"
   checksum: 10c0/9fcbb8a1e7924bfb5eaeb65a34fcd65bb37f739a85eaa303ae3562a1ef9aae4156c60baf397e4923cdb038b908ad18758fb42fcd6cde1ca45dace26d052c96fa
+  languageName: node
+  linkType: hard
+
+"@dnd-kit/state@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@dnd-kit/state@npm:0.4.0"
+  dependencies:
+    "@preact/signals-core": "npm:^1.10.0"
+    tslib: "npm:^2.6.2"
+  checksum: 10c0/22ced96e6477095c5a2e6176438f6b56bb343e5cf52a2bbe2eeeda2f31d8ba25b848c1e6b5c79112e3dcaf53add1fdc598a21e0bbf7486a5f3c06001a4db5791
   languageName: node
   linkType: hard
 
@@ -2125,6 +2166,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "improvedtodoreact@workspace:apps/web"
   dependencies:
+    "@dnd-kit/helpers": "npm:^0.4.0"
     "@dnd-kit/react": "npm:^0.3.2"
     "@eslint/js": "npm:^9.39.1"
     "@tailwindcss/vite": "npm:^4.2.1"

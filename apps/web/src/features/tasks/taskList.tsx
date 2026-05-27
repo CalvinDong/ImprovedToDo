@@ -1,7 +1,9 @@
 import { useOutletContext } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { tasksQueryOptions } from "./taskQueries";
 import { useSortable } from '@dnd-kit/react/sortable';
+import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
+import { arrayMove, move } from '@dnd-kit/helpers';
 import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
 import { useCreateTaskMutation } from "./hooks/useCreateTaskMutation.ts";
 import { LexoRank } from "./lexoRank.ts";
@@ -13,8 +15,10 @@ import SortDropdown from "./components/sortDropdown.tsx";
 import type { CreateTaskMutationInput, TaskViewModel } from "./types.ts";
 import type { AppShellOutletContext } from "./types.ts";
 import type { SortState } from "./types.ts";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+
+
 
 interface Props {
   list: string;
@@ -26,18 +30,38 @@ type SortableProps = {
 };
 
 const TaskList = ({ list }: Props) => {
+    /*const createRange = (start: number, end: number, step: number = 1): number[] => {
+        const length = Math.max(Math.ceil((end - start) / step), 0);
+        return Array.from({ length }, (_, i) => start + i * step);
+    };
+
+    type Sortable2Props = {
+        id: number;
+        index: number;
+    };
+
+    function Sortable2({ id, index }: Sortable2Props) {
+        const {ref} = useSortable({id, index});
+
+        return (
+            <li ref={ref} className="item">Item {id}</li>
+        );
+    }
+
+    const [items, setItems] = useState(createRange(0, 100));*/
+
     const { setSelectedTaskId, selectedTaskId, setSelectedTaskPanelKey, selectedTaskPanelKey } = useOutletContext<AppShellOutletContext>();
     const sortOptions = [
+        { value: "default", label: "Default", supportsDirection: false },
         { value: "created", label: "Created date", supportsDirection: true },
         { value: "edited", label: "Edited date", supportsDirection: true },
         { value: "alphabetical", label: "Alphabetical", supportsDirection: true },
         { value: "tags", label: "Tags", supportsDirection: true },
-        { value: "custom", label: "Custom order", supportsDirection: false },
     ] as const;
 
     type TaskSortField = (typeof sortOptions)[number]["value"];
     const [sort, setSort] = useState<SortState<TaskSortField>>({
-        field: "custom",
+        field: "default",
         direction: "asc",
     });
 
@@ -84,29 +108,54 @@ const TaskList = ({ list }: Props) => {
     };
 
     function openPanel(id: string, clientId?: string){
+        console.log("openPanel", { id, clientId });
         if (id === selectedTaskId || clientId === selectedTaskPanelKey){
             setSelectedTaskId(null);
             setSelectedTaskPanelKey(null);
             return;
         }
-
         setSelectedTaskId(id)
         setSelectedTaskPanelKey(clientId ?? id);
-
     }
+
+    /*function HandleDragEnd(event: DragEndEvent){
+        const queryClient = useQueryClient();
+        const queryKey = ["tasks", list];
+        queryClient.setQueryData<TaskViewModel[]>(queryKey, (oldTasks) => {
+        if (!oldTasks) return oldTasks;
+
+        const oldIndex = oldTasks.findIndex((task) => task.id === source.id);
+        const newIndex = oldTasks.findIndex((task) => task.id === target.id);
+
+        if (oldIndex === -1 || newIndex === -1) return oldTasks;
+
+        return arrayMove(oldTasks, oldIndex, newIndex).map((task, index) => ({
+            ...task,
+            order: index,
+        }));
+        });
+    }*/
 
     function Sortable({ item, index }: SortableProps) {
         const [element, setElement] = useState<Element | null>(null);
         const handleRef = useRef<HTMLButtonElement | null>(null);
+        const isCustomSort = sort.field === "default";
+        const {isDragging} = useSortable({
+            id: item.id, 
+            index, element, 
+            handle: handleRef,
+            disabled: !isCustomSort
+        });
 
-        const { isDragging } = useSortable({
+        /*const { isDragging } = useSortable({
             id: item.id,
             index,
             element,
             handle: handleRef,
-        });
+        });*/
 
         return (
+            <div>
             <div ref={setElement} data-shadow={isDragging || undefined}>
                 <TaskCard
                     completed={item.completed}
@@ -134,16 +183,17 @@ const TaskList = ({ list }: Props) => {
                             {item.title}
                             </p>
                         </div>
-                        <button
+                        {isCustomSort ? <button
                             ref={handleRef}
                             type="button"
                             className="shrink-0 cursor-grab"
                             aria-label="Drag task"
                         >
                             ⋮⋮
-                        </button>
+                        </button> : <div/>}
                     </div>
                 </TaskCard>
+            </div>
             </div>
         );
     }
@@ -195,7 +245,7 @@ const TaskList = ({ list }: Props) => {
                 });
                 break;
 
-            case "custom":
+            case "default":
                 break;
         }
         return tasksCopy;
@@ -208,56 +258,64 @@ const TaskList = ({ list }: Props) => {
     if (isError) {
         return <div>{error instanceof Error ? error.message : "Failed to load tasks."}</div>;
     }
+    
 
     return (
-    <AnimatePresence mode="popLayout">
-    <div className="h-full">
-        <div
-            className="flex flex-col gap-3 mb-3 min-h-full"
-            onMouseDown={(e) => {
-                /*if (e.target === e.currentTarget) {
-                setSelectedTaskId(null);
-                setSelectedTaskPanelKey(null);
-                }*/
-            }}
-        >
-            <div className="flex items-center justify-between sticky top-0 z-50 bg-base-300">
-                <h1 className="text-4xl font-bold">The Day</h1>
-                <SortDropdown
-                    options={sortOptions}
-                    sort={sort}
-                    onSortChange={setSort}
-                />
+        <AnimatePresence mode="popLayout">
+            <div className="h-full">
+                <div
+                    className="flex flex-col gap-3 mb-3 min-h-full"
+                    onMouseDown={(e) => {
+                        /*if (e.target === e.currentTarget) {
+                        setSelectedTaskId(null);
+                        setSelectedTaskPanelKey(null);
+                        }*/
+                    }}
+                >
+                    <div className="flex items-center justify-between sticky top-0 z-50 bg-base-300">
+                        <h1 className="text-4xl font-bold">The Day</h1>
+                        <SortDropdown
+                            options={sortOptions}
+                            sort={sort}
+                            defaultState={{ field: "default", direction: "asc" }}
+                            onSortChange={setSort}
+                        />
+                    </div>
+
+                    {sortedTasks.map((item, index) => (
+                        <motion.div key={item.clientId ?? item.id} layout transition={{ duration: 0.2 }}>
+                            <Sortable key={item.id} item={item} index={index} />
+                        </motion.div>
+                    ))}
+
+                    {/*<ul className="list">
+                        {items.map((id, index) =>
+                            <Sortable2 key={id} id={id} index={index} />
+                        )}
+                    </ul>*/}
+
+                    <TaskCard>
+                        <input
+                        type="text"
+                        className="input shadow-none p-0 leading-none border-none bg-transparent w-full break-all
+                                    focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
+                        placeholder="Add new task"
+                        maxLength={100}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                            const value = e.currentTarget.value.trim();
+                            if (!value) return;
+                            handleSubmit(value, e.shiftKey, tasks.length);
+                            e.currentTarget.value = "";
+                            }
+                        }}
+                        />
+                    </TaskCard>
+                </div>
+                <button className="btn" onClick={() => console.log(tasks)}></button>
             </div>
-
-            {sortedTasks.map((item, index) => (
-                <motion.div key={item.clientId ?? item.id} layout  transition={{ duration: 0.2 }}>
-                    <Sortable key={item.id} item={item} index={index} />
-                </motion.div>
-            ))}
-
-            <TaskCard>
-                <input
-                type="text"
-                className="input shadow-none p-0 leading-none border-none bg-transparent w-full break-all
-                            focus:outline-none focus:ring-0 focus:border-none focus:shadow-none"
-                placeholder="Add new task"
-                maxLength={100}
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                    const value = e.currentTarget.value.trim();
-                    if (!value) return;
-                    handleSubmit(value, e.shiftKey, tasks.length);
-                    e.currentTarget.value = "";
-                    }
-                }}
-                />
-            </TaskCard>
-        </div>
-        <button className="btn" onClick={() => console.log(tasks)}></button>
-    </div>
-     </AnimatePresence>
+        </AnimatePresence>
     );
 };
 
