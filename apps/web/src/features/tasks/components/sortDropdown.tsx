@@ -16,7 +16,7 @@ export default function SortDropdown<T extends string>({
 }: SortDropdownProps<T>) {
   const selectedOption = options.find((option) => option.value === sort.field);
   const showDirection = selectedOption?.supportsDirection ?? false;
-  const defaultSelected = sort.field === "default"
+  const defaultSelected = sort.field === defaultState.field;
 
   const [open, setOpen] = useState(false);
 
