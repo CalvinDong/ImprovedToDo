@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{BC2D172B-13B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImprovedToDo.Api", "apps\api\ImprovedToDo.Api\ImprovedToDo.Api.csproj", "{F3536BE3-5CC4-6514-53AD-344E15A278FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImprovedToDo.Api.Tests", "apps\api\ImprovedToDo.Api.Tests\ImprovedToDo.Api.Tests.csproj", "{D4EA3017-99E9-4BBF-B662-024C46A12FAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +20,10 @@ Global
 		{F3536BE3-5CC4-6514-53AD-344E15A278FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3536BE3-5CC4-6514-53AD-344E15A278FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3536BE3-5CC4-6514-53AD-344E15A278FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4EA3017-99E9-4BBF-B662-024C46A12FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4EA3017-99E9-4BBF-B662-024C46A12FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4EA3017-99E9-4BBF-B662-024C46A12FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4EA3017-99E9-4BBF-B662-024C46A12FAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -25,6 +31,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BC2D172B-13BC-136C-CDB1-4B1A687208C4} = {1787FE1D-075E-9E68-7218-25F1BD1BBEAB}
 		{F3536BE3-5CC4-6514-53AD-344E15A278FE} = {BC2D172B-13BC-136C-CDB1-4B1A687208C4}
+		{D4EA3017-99E9-4BBF-B662-024C46A12FAD} = {BC2D172B-13BC-136C-CDB1-4B1A687208C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BCA6539D-E95F-4CE7-982B-BDA501A1AA46}
