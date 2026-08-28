@@ -28,6 +28,7 @@ public class TaskModule : IModule
         group.MapPatch("/{id:guid}/complete", SetTasksComplete);
         group.MapPatch("/{id:guid}/position", UpdateTasksPosition);
 
+
         return endpoints;
     }
 

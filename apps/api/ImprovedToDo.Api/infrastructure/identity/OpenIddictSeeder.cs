@@ -6,6 +6,9 @@ public static class OpenIddictSeeder
     public static async Task SeedClients(IServiceProvider provider)
     {
         var manager = provider.GetRequiredService<IOpenIddictApplicationManager>();
+        var configuration = provider.GetRequiredService<IConfiguration>();
+        var apiUrl = GetRequiredBaseUri(configuration, "ApplicationUrls:Api");
+        var spaUrl = GetRequiredBaseUri(configuration, "ApplicationUrls:Spa");
 
         var swagClient = await manager.FindByClientIdAsync("swagger");
         if (swagClient != null)
@@ -20,7 +23,7 @@ public static class OpenIddictSeeder
 
             RedirectUris =
             {
-                new Uri("https://localhost:5231/swagger/oauth2-redirect.html")
+                new Uri(apiUrl, "/swagger/oauth2-redirect.html")
             },
 
             Requirements =
@@ -55,12 +58,12 @@ public static class OpenIddictSeeder
 
             RedirectUris =
             {
-                new Uri("http://localhost:5173/auth/callback")
+                new Uri(spaUrl, "/auth/callback")
             },
 
             PostLogoutRedirectUris =
             {
-                new Uri("http://localhost:5173/logout-page")
+                new Uri(spaUrl, "/logout-page")
             },
 
             Requirements =
@@ -84,6 +87,19 @@ public static class OpenIddictSeeder
                 OpenIddictConstants.Permissions.Prefixes.Scope + "api"
             }
         });
-    
+    }
+
+    private static Uri GetRequiredBaseUri(
+        IConfiguration configuration,
+        string configurationKey)
+    {
+        var value = configuration[configurationKey];
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        {
+            throw new InvalidOperationException(
+                $"{configurationKey} must be configured as an absolute URL.");
+        }
+
+        return uri;
     }
 }

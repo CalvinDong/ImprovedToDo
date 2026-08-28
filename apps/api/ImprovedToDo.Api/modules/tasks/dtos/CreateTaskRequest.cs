@@ -57,7 +57,8 @@ public sealed class SetTaskCompleteRequest
 
 public sealed class UpdateTaskPositionRequest
 {
-    public string LexoRank { get; set; }
+    public Guid? beforeTaskId { get; }
+    public Guid? afterTaskId { get; }
     public Guid? TodoListId { get; set; }
 }
 

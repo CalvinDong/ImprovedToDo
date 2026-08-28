@@ -39,7 +39,7 @@ export interface UpdateTaskRequest {
   dueDate?: Date
   completed?: boolean
   todoListId?: string
-
+  lexoRank?: string
 }
 
 export interface MoveTaskRequest {

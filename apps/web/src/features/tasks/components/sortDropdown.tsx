@@ -21,10 +21,10 @@ export default function SortDropdown<T extends string>({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={`flex gap-0.5 ${defaultSelected ? "" : "border-solid border-2 border-accent rounded-md"}`}>
+    <div className={`flex gap-0.5 ${defaultSelected ? "" : "border-solid border-2 border-accent/75 rounded-md"}`}>
        { !defaultSelected ?
         <button 
-          className="btn btn-sm btn-ghost border border-base-300 bg-base-100 font-extrabold text-error"
+          className={`btn btn-sm btn-ghost btn-base-100 bg-error/75 border border-base-300 font-extrabold hover:bg-error`}
           onClick={() =>
                       onSortChange(defaultState)
                     }

@@ -25,7 +25,7 @@ builder.Services
     .AddValidation()
     .AddSwaggerDocs()
     .RegisterModules()
-    .AddCors();
+    .AddCors(builder.Configuration);
 
 
 var app = builder.Build();

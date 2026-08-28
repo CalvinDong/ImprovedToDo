@@ -51,8 +51,10 @@ const TaskList = ({ list }: Props) => {
     const [items, setItems] = useState(createRange(0, 100));*/
 
     const { setSelectedTaskId, selectedTaskId, setSelectedTaskPanelKey, selectedTaskPanelKey } = useOutletContext<AppShellOutletContext>();
+    const defaultOption = { value: "default", label: "Default", supportsDirection: false }
+    const defaultState: SortState<string> = { field: "default", direction: "asc"}
     const sortOptions = [
-        { value: "default", label: "Default", supportsDirection: false },
+        defaultOption,
         { value: "created", label: "Created date", supportsDirection: true },
         { value: "edited", label: "Edited date", supportsDirection: true },
         { value: "alphabetical", label: "Alphabetical", supportsDirection: true },
@@ -60,10 +62,7 @@ const TaskList = ({ list }: Props) => {
     ] as const;
 
     type TaskSortField = (typeof sortOptions)[number]["value"];
-    const [sort, setSort] = useState<SortState<TaskSortField>>({
-        field: "default",
-        direction: "asc",
-    });
+    const [sort, setSort] = useState<SortState<TaskSortField>>(defaultState);
 
     const completeTaskMutation = useCompleteTaskMutation(list);
     const createTaskMutation = useCreateTaskMutation(list);
@@ -277,7 +276,7 @@ const TaskList = ({ list }: Props) => {
                         <SortDropdown
                             options={sortOptions}
                             sort={sort}
-                            defaultState={{ field: "default", direction: "asc" }}
+                            defaultState={defaultState}
                             onSortChange={setSort}
                         />
                     </div>
