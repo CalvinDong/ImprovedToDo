@@ -1,21 +1,21 @@
 import { useOutletContext } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { tasksQueryOptions } from "./taskQueries";
+import { tasksQueryOptions } from "../../api/taskQueries";
 import { isSortableOperation, useSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
 import { arrayMove } from '@dnd-kit/helpers';
-import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
-import { useCreateTaskMutation } from "./hooks/useCreateTaskMutation.ts";
-import { useReorderTaskMutation } from "./hooks/useReorderTaskMutation.ts";
-import { LexoRank } from "./lexoRank.ts";
+import { useCompleteTaskMutation } from "../../hooks/useCompleteTaskMutation.ts";
+import { useCreateTaskMutation } from "../../hooks/useCreateTaskMutation.ts";
+import { useReorderTaskMutation } from "../../hooks/useReorderTaskMutation.ts";
+import { LexoRank } from "../../model/lexoRank.ts";
 
-import TaskCard from "./taskCard.tsx";
-import Checkbox from "./components/checkbox.tsx";
-import SortDropdown from "./components/sortDropdown.tsx";
+import TaskCard from "./TaskCard.tsx";
+import Checkbox from "../../components/TaskCheckbox.tsx";
+import SortDropdown from "../../components/TaskSortDropdown.tsx";
 
-import type { CreateTaskMutationInput, TaskViewModel } from "./types.ts";
-import type { AppShellOutletContext } from "./types.ts";
-import type { SortState } from "./types.ts";
+import type { CreateTaskMutationInput, TaskViewModel } from "../../model/taskTypes.ts";
+import type { AppShellOutletContext } from "../../model/taskTypes.ts";
+import type { SortState } from "../../model/taskTypes.ts";
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 
@@ -69,7 +69,7 @@ const TaskList = ({ list }: Props) => {
     const createTaskMutation = useCreateTaskMutation(list);
     const reorderTaskMutation = useReorderTaskMutation(list);
 
-    const handleSubmit = (title: string, openPanel: boolean, listLength: number) => {
+    const handleSubmit = (title: string, openPanel: boolean) => {
         const trimmed = title.trim();
         if (!trimmed) return;
 
@@ -279,7 +279,7 @@ const TaskList = ({ list }: Props) => {
             <div className="h-full">
                 <div
                     className="flex flex-col gap-3 mb-3 min-h-full"
-                    onMouseDown={(e) => {
+                    onMouseDown={() => {
                         /*if (e.target === e.currentTarget) {
                         setSelectedTaskId(null);
                         setSelectedTaskPanelKey(null);
@@ -339,7 +339,7 @@ const TaskList = ({ list }: Props) => {
                             if (e.key === "Enter") {
                             const value = e.currentTarget.value.trim();
                             if (!value) return;
-                            handleSubmit(value, e.shiftKey, tasks.length);
+                            handleSubmit(value, e.shiftKey);
                             e.currentTarget.value = "";
                             }
                         }}

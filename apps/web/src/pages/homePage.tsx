@@ -1,6 +1,6 @@
 import { useOutletContext } from "react-router-dom";
-import TaskList from "../features/tasks/taskList"
-import type { AppShellOutletContext } from "../features/tasks/types";
+import TaskList from "../features/tasks/components/TaskList/TaskList"
+import type { AppShellOutletContext } from "../features/tasks/model/taskTypes";
 
 export default function HomePage() {
   const { setSelectedTaskId, setSelectedTaskPanelKey } =

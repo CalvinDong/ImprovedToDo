@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "../features/auth/authContext";
-import SelectedTaskPanel from "../features/tasks/selectedTaskPanel";
-import { PanelEdgeOverlay } from "../features/tasks/components/panelEdgeoverlay";
-import type { AppShellOutletContext } from "../features/tasks/types";
+import SelectedTaskPanel from "../features/tasks/components/SelectedTaskPanel/SelectedTaskPanel";
+import type { AppShellOutletContext } from "../features/tasks/model/taskTypes";
 
 function pxToRem(px: number) {
   const rootFontSize = parseFloat(

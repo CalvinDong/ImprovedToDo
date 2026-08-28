@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { motion } from "framer-motion";
-import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
+import { useCompleteTaskMutation } from "../../hooks/useCompleteTaskMutation.ts";
 import { useQuery } from "@tanstack/react-query";
-import { tasksQueryOptions } from "./taskQueries.ts";
-import { useUpdateTaskMutation } from "./hooks/useUpdateTaskMutation.ts";
-import { useDeleteTaskMutation } from "./hooks/useDeleteTaskMutation.ts";
-import { useAutoResizeTextarea } from "./hooks/useAutoResizeTextArea.ts";
+import { tasksQueryOptions } from "../../api/taskQueries.ts";
+import { useUpdateTaskMutation } from "../../hooks/useUpdateTaskMutation.ts";
+import { useDeleteTaskMutation } from "../../hooks/useDeleteTaskMutation.ts";
+import { useAutoResizeTextarea } from "../../hooks/useAutoResizeTextArea.ts";
 
 import type { UpdateTaskRequest } from "@todo/contracts";
 
-import Checkbox from "./components/checkbox.tsx";
+import Checkbox from "../../components/TaskCheckbox.tsx";
 
 interface Props {
   selectedTaskId: string;

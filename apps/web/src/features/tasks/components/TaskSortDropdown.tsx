@@ -1,5 +1,4 @@
-import { useState } from "react";
-import type { SortOption, SortState } from "../types";
+import type { SortOption, SortState } from "../model/taskTypes";
 
 type SortDropdownProps<T extends string> = {
   options: readonly SortOption<T>[];
@@ -18,12 +17,10 @@ export default function SortDropdown<T extends string>({
   const showDirection = selectedOption?.supportsDirection ?? false;
   const defaultSelected = sort.field === defaultState.field;
 
-  const [open, setOpen] = useState(false);
-
   return (
     <div className={`flex gap-0.5 ${defaultSelected ? "" : "border-solid border-2 border-accent/75 rounded-md"}`}>
        { !defaultSelected ?
-        <button 
+        <button
           className={`btn btn-sm btn-ghost btn-base-100 bg-error/75 border border-base-300 font-extrabold hover:bg-error`}
           onClick={() =>
                       onSortChange(defaultState)
@@ -131,7 +128,7 @@ export default function SortDropdown<T extends string>({
         </div>
       </div>
       { showDirection ?
-        <button 
+        <button
           className="btn btn-sm btn-ghost border border-base-300 bg-base-100 font-medium"
           onClick={() =>
                       onSortChange({
@@ -144,8 +141,6 @@ export default function SortDropdown<T extends string>({
         </button> : <></>
       }
     </div>
-    
+
   );
 }
-
-

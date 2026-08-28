@@ -1,7 +1,7 @@
 import { arrayMove } from "@dnd-kit/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateTask } from "../taskQueries";
-import type { TaskViewModel } from "../types";
+import { updateTask } from "../api/taskApi";
+import type { TaskViewModel } from "../model/taskTypes";
 
 type ReorderTaskInput = {
   taskId: string;

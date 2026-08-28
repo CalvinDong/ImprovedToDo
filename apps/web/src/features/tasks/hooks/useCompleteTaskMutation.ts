@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { setCompleteTask } from "../taskQueries";
+import { setCompleteTask } from "../api/taskApi";
 import type { SetTaskCompletedRequest } from "@todo/contracts";
-import type { TaskViewModel } from "../types";
+import type { TaskViewModel } from "../model/taskTypes";
 
 export function useCompleteTaskMutation(list: string) {
   const queryClient = useQueryClient();

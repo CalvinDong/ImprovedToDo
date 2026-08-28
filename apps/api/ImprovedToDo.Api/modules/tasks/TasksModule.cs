@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Api.Dtos.Tasks;
 using FluentValidation;
 
-public class TaskModule : IModule
+public class TasksModule : IModule
 {
     public IServiceCollection RegisterModule(IServiceCollection services)
     {

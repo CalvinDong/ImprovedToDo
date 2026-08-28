@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteTask } from "../taskQueries";
-import type { TaskViewModel } from "../types";
+import { deleteTask } from "../api/taskApi";
+import type { TaskViewModel } from "../model/taskTypes";
 
 export function useDeleteTaskMutation(list: string){
     const queryClient = useQueryClient();
@@ -32,4 +32,3 @@ export function useDeleteTaskMutation(list: string){
         },
     });
 }
-

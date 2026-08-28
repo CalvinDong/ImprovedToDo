@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createTask } from "../taskQueries";
-import type { CreateTaskMutationInput, TaskViewModel } from "../types";
-import { delay } from "framer-motion";
-import type { LexoRank } from "../lexoRank";
+import { createTask } from "../api/taskApi";
+import type { CreateTaskMutationInput, TaskViewModel } from "../model/taskTypes";
 
 type CreateTaskContext = {
   previousTasks?: TaskViewModel[];
@@ -32,6 +30,7 @@ export function useCreateTaskMutation(
 
   return useMutation<TaskViewModel, Error, CreateTaskMutationInput, CreateTaskContext>({
     mutationFn: async ({ clientId: _clientId, ...data }) => {
+      void _clientId;
       return createTask(list, data);
     },
 
