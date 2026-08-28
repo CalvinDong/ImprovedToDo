@@ -3,6 +3,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using OpenIddict.Abstractions;
+using OpenIddict.Core;
 
 public class AuthService : IAuthService
 {
@@ -90,10 +91,10 @@ public class AuthService : IAuthService
         principal.SetScopes(request.GetScopes());
 
         // Optional but strongly recommended: control which claims go where.
-        /*foreach (var claim in principal.Claims)
+        foreach (var claim in principal.Claims)
         {
             claim.SetDestinations(ClaimsHelper.GetDestinations(claim, principal));
-        }*/
+        }
 
         return new LoginResult
         {

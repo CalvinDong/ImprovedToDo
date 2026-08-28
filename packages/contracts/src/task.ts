@@ -14,25 +14,32 @@ export interface SubTaskDto {
 export interface TaskDto {
   id: string
   title: string
-  description: string | null
-  listId: string
-  order: number
-  tags: TagDto[]
-  connectedTaskIds: string[]
-  subtasks: SubTaskDto[]
-  createdAt: string
-  updatedAt: string
+  description?: string | null
+  completed: boolean
+  listId?: string
+  lexoRank: string
+  tags?: TagDto[]
+  connectedTaskIds?: string[]
+  subtasks?: SubTaskDto[]
+  createdAtUtc: string
+  updatedAtUtc: string
 }
 
 export interface CreateTaskRequest {
   title: string
   description?: string | null
-  listId: string
+  listId?: string
+  lexoRank: string
 }
 
 export interface UpdateTaskRequest {
   title?: string
   description?: string | null
+  dueDateSet?: boolean
+  dueDate?: Date
+  completed?: boolean
+  todoListId?: string
+  lexoRank?: string
 }
 
 export interface MoveTaskRequest {
@@ -40,4 +47,8 @@ export interface MoveTaskRequest {
   sourceListId: string
   destinationListId: string
   newOrder: number
+}
+
+export interface SetTaskCompletedRequest {
+  completed: boolean
 }

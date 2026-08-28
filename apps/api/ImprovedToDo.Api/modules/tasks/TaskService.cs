@@ -30,7 +30,7 @@ public class TaskService : ITaskService
             TodoListId = request.TodoListId,
             Title = request.Title,
             Description = request.Description,
-            Position = request.Position ?? 0,
+            LexoRank = request.LexoRank,
             Completed = false,
             DueDate = request.DueDate,
             CreatedAt = DateTimeOffset.UtcNow,
@@ -68,7 +68,7 @@ public class TaskService : ITaskService
                                                (x.Description != null && x.Description.Contains(query.Search)));
         
         return await tasksQuery
-            .OrderBy(x => x.Position)
+            .OrderBy(x => x.LexoRank)
             .ThenBy(x => x.CreatedAt)
             .Select(TaskResponse.Projection)
             .ToListAsync(ct);
@@ -117,6 +117,9 @@ public class TaskService : ITaskService
 
             task.TodoListId = request.TodoListId.Value;
         }
+
+        if (request.LexoRank is not null)
+            task.LexoRank = request.LexoRank;
 
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
@@ -176,26 +179,55 @@ public class TaskService : ITaskService
     }
 
     public async Task<TaskResponse> UpdateTasksPosition(UpdateTaskPositionRequest request, Guid id, string userId, CancellationToken ct)
+{
+    var task = await _context.TodoItems
+        .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
+
+    if (task is null)
+        throw new NotFoundException("Task not found.");
+
+    var beforeTask = request.beforeTaskId is null
+        ? null
+        : await _context.TodoItems.FirstOrDefaultAsync(
+            x => x.Id == request.beforeTaskId && x.UserId == userId,
+            ct);
+
+    var afterTask = request.afterTaskId is null
+        ? null
+        : await _context.TodoItems.FirstOrDefaultAsync(
+            x => x.Id == request.afterTaskId && x.UserId == userId,
+            ct);
+
+    if (request.beforeTaskId is not null && beforeTask is null)
+        throw new NotFoundException("Before task not found.");
+
+    if (request.afterTaskId is not null && afterTask is null)
+        throw new NotFoundException("After task not found.");
+
+    var newRank = (beforeTask, afterTask) switch
     {
-         var task = await _context.TodoItems
-            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, ct);
-        
-        if (task is null)
-            throw new NotFoundException("Task not found.");
+        (null, null) => LexoRankCalculator.InitialRank(),
 
-        task.Position = request.Position;
-        task.UpdatedAt = DateTimeOffset.UtcNow;
+        (null, not null) => LexoRankCalculator.Before(afterTask.LexoRank),
 
-        try
-        {
-            await _context.SaveChangesAsync(ct);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ConflictException("The task was modified by another request.");
-        }
+        (not null, null) => LexoRankCalculator.After(beforeTask.LexoRank),
 
-        return TaskResponse.FromEntity(task);
+        (not null, not null) => LexoRankCalculator.Between(
+            beforeTask.LexoRank,
+            afterTask.LexoRank)
+    };
 
+    task.LexoRank = newRank;
+
+    try
+    {
+        await _context.SaveChangesAsync(ct);
     }
+    catch (DbUpdateConcurrencyException)
+    {
+        throw new ConflictException("The task was modified by another request.");
+    }
+
+    return TaskResponse.FromEntity(task);
+}
 }

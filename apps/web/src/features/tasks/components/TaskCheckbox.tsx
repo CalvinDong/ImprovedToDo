@@ -1,0 +1,20 @@
+interface Props{
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+}
+
+export default function Checkbox({ checked, onChange } : Props){
+    return(
+        <input
+            type="checkbox"
+            checked={checked}
+            className="
+                checkbox
+                checked:bg-primary/80 checked:text-primary-content/40
+            "
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => onChange(e.target.checked)}
+        >
+        </input>
+    );
+}

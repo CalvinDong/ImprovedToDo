@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  },
+  "packageManager": "yarn@4.13.0"
+}

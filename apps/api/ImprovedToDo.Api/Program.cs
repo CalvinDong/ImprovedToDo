@@ -16,16 +16,16 @@ builder.Services
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 builder.Services.AddRazorPages();
-builder.Services.AddAuthorization();
 
 builder.Services
     .AddDatabase(builder.Configuration)
+    .AddAuthorization()
     .AddIdentityServices()
     .AddOpenIddictServices()
     .AddValidation()
     .AddSwaggerDocs()
     .RegisterModules()
-    .AddCors();
+    .AddCors(builder.Configuration);
 
 
 var app = builder.Build();

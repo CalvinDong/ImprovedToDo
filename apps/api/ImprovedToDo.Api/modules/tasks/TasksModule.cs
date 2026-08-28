@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Api.Dtos.Tasks;
 using FluentValidation;
 
-public class TaskModule : IModule
+public class TasksModule : IModule
 {
     public IServiceCollection RegisterModule(IServiceCollection services)
     {
@@ -16,7 +16,7 @@ public class TaskModule : IModule
     {
         var group = endpoints.MapGroup("/tasks")
             .WithTags("Tasks")
-            .RequireAuthorization();
+            .RequireAuthorization("ApiPolicy");
 
         group.MapPost("/", CreateTask);
         group.MapGet("/", GetTasks);
@@ -27,6 +27,7 @@ public class TaskModule : IModule
         // Useful soon after:
         group.MapPatch("/{id:guid}/complete", SetTasksComplete);
         group.MapPatch("/{id:guid}/position", UpdateTasksPosition);
+
 
         return endpoints;
     }

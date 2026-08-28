@@ -3,3 +3,4 @@ apps/api/ImprovedToDo.Api/appsettings.json
 
 apps/api/ImprovedToDo.Api/bin/Debug
 apps/api/ImprovedToDo.Api/obj
+node_modules
