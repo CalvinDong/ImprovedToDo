@@ -1,6 +1,6 @@
 import { arrayMove } from "@dnd-kit/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateTask } from "../api/taskApi";
+import { updateTaskPosition } from "../api/taskApi";
 import type { TaskViewModel } from "../model/taskTypes";
 
 type ReorderTaskInput = {
@@ -8,6 +8,8 @@ type ReorderTaskInput = {
   sourceIndex: number;
   targetIndex: number;
   lexoRank: string;
+  beforeTaskId: string | null;
+  afterTaskId: string | null;
 };
 
 type ReorderTaskContext = {
@@ -24,8 +26,8 @@ export function useReorderTaskMutation(list: string) {
     ReorderTaskInput,
     ReorderTaskContext
   >({
-    mutationFn: ({ taskId, lexoRank }) =>
-      updateTask(list, taskId, { lexoRank }),
+    mutationFn: ({ taskId, beforeTaskId, afterTaskId }) =>
+      updateTaskPosition(list, taskId, { beforeTaskId, afterTaskId }),
 
     onMutate: async ({ taskId, sourceIndex, targetIndex, lexoRank }) => {
       await queryClient.cancelQueries({ queryKey });

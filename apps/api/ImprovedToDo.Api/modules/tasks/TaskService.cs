@@ -118,9 +118,6 @@ public class TaskService : ITaskService
             task.TodoListId = request.TodoListId.Value;
         }
 
-        if (request.LexoRank is not null)
-            task.LexoRank = request.LexoRank;
-
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
         try
@@ -186,23 +183,39 @@ public class TaskService : ITaskService
     if (task is null)
         throw new NotFoundException("Task not found.");
 
-    var beforeTask = request.beforeTaskId is null
+    if (request.BeforeTaskId == id || request.AfterTaskId == id)
+        throw new ValidationException("A task cannot be positioned relative to itself.");
+
+    if (request.BeforeTaskId is not null && request.BeforeTaskId == request.AfterTaskId)
+        throw new ValidationException("Before and after tasks must be different tasks.");
+
+    var beforeTask = request.BeforeTaskId is null
         ? null
         : await _context.TodoItems.FirstOrDefaultAsync(
-            x => x.Id == request.beforeTaskId && x.UserId == userId,
+            x => x.Id == request.BeforeTaskId && x.UserId == userId,
             ct);
 
-    var afterTask = request.afterTaskId is null
+    var afterTask = request.AfterTaskId is null
         ? null
         : await _context.TodoItems.FirstOrDefaultAsync(
-            x => x.Id == request.afterTaskId && x.UserId == userId,
+            x => x.Id == request.AfterTaskId && x.UserId == userId,
             ct);
 
-    if (request.beforeTaskId is not null && beforeTask is null)
+    if (request.BeforeTaskId is not null && beforeTask is null)
         throw new NotFoundException("Before task not found.");
 
-    if (request.afterTaskId is not null && afterTask is null)
+    if (request.AfterTaskId is not null && afterTask is null)
         throw new NotFoundException("After task not found.");
+
+    if (beforeTask is not null && beforeTask.TodoListId != task.TodoListId)
+        throw new ValidationException("Before task must belong to the same list.");
+
+    if (afterTask is not null && afterTask.TodoListId != task.TodoListId)
+        throw new ValidationException("After task must belong to the same list.");
+
+    if (beforeTask is not null && afterTask is not null &&
+        string.CompareOrdinal(beforeTask.LexoRank, afterTask.LexoRank) >= 0)
+        throw new ValidationException("Before task must be ordered before the after task.");
 
     var newRank = (beforeTask, afterTask) switch
     {

@@ -3,6 +3,7 @@ import type {
   CreateTaskRequest,
   SetTaskCompletedRequest,
   TaskDto,
+  UpdateTaskPositionRequest,
   UpdateTaskRequest,
 } from "@todo/contracts";
 
@@ -20,6 +21,18 @@ export function updateTask(
 ): Promise<TaskDto> {
   return sendJson<UpdateTaskRequest, TaskDto>(
     `${list}/${taskId}`,
+    "PATCH",
+    data
+  );
+}
+
+export function updateTaskPosition(
+  list: string,
+  taskId: string,
+  data: UpdateTaskPositionRequest
+): Promise<TaskDto> {
+  return sendJson<UpdateTaskPositionRequest, TaskDto>(
+    `${list}/${taskId}/position`,
     "PATCH",
     data
   );

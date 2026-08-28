@@ -149,6 +149,8 @@ const TaskList = ({ list }: Props) => {
             sourceIndex,
             targetIndex,
             lexoRank,
+            beforeTaskId: previousTask?.id ?? null,
+            afterTaskId: nextTask?.id ?? null,
         });
     }
 
