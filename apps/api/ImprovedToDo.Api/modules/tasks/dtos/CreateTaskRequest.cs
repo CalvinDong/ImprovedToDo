@@ -37,6 +37,7 @@ public sealed class UpdateTaskRequest
 
     public bool? Completed { get; set; }
     public Guid? TodoListId { get; set; }
+    public string? LexoRank { get; set; }
 }
 
 public class UpdateTaskValidator : AbstractValidator<UpdateTaskRequest>
@@ -47,6 +48,9 @@ public class UpdateTaskValidator : AbstractValidator<UpdateTaskRequest>
             .MaximumLength(200);
         RuleFor(x => x.Description)
             .MaximumLength(2000);
+        RuleFor(x => x.LexoRank)
+            .NotEmpty()
+            .When(x => x.LexoRank is not null);
     }
 }
 
@@ -111,4 +115,3 @@ public sealed class TaskResponse
         };
     }
 }
-

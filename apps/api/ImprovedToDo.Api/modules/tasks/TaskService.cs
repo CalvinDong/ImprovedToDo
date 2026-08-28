@@ -118,6 +118,9 @@ public class TaskService : ITaskService
             task.TodoListId = request.TodoListId.Value;
         }
 
+        if (request.LexoRank is not null)
+            task.LexoRank = request.LexoRank;
+
         task.UpdatedAt = DateTimeOffset.UtcNow;
 
         try

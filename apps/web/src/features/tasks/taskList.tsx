@@ -1,11 +1,12 @@
 import { useOutletContext } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { tasksQueryOptions } from "./taskQueries";
-import { useSortable } from '@dnd-kit/react/sortable';
+import { isSortableOperation, useSortable } from '@dnd-kit/react/sortable';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
-import { arrayMove, move } from '@dnd-kit/helpers';
+import { arrayMove } from '@dnd-kit/helpers';
 import { useCompleteTaskMutation } from "./hooks/useCompleteTaskMutation.ts";
 import { useCreateTaskMutation } from "./hooks/useCreateTaskMutation.ts";
+import { useReorderTaskMutation } from "./hooks/useReorderTaskMutation.ts";
 import { LexoRank } from "./lexoRank.ts";
 
 import TaskCard from "./taskCard.tsx";
@@ -15,8 +16,8 @@ import SortDropdown from "./components/sortDropdown.tsx";
 import type { CreateTaskMutationInput, TaskViewModel } from "./types.ts";
 import type { AppShellOutletContext } from "./types.ts";
 import type { SortState } from "./types.ts";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useMemo, useRef, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 
 
 
@@ -66,6 +67,7 @@ const TaskList = ({ list }: Props) => {
 
     const completeTaskMutation = useCompleteTaskMutation(list);
     const createTaskMutation = useCreateTaskMutation(list);
+    const reorderTaskMutation = useReorderTaskMutation(list);
 
     const handleSubmit = (title: string, openPanel: boolean, listLength: number) => {
         const trimmed = title.trim();
@@ -117,23 +119,38 @@ const TaskList = ({ list }: Props) => {
         setSelectedTaskPanelKey(clientId ?? id);
     }
 
-    /*function HandleDragEnd(event: DragEndEvent){
-        const queryClient = useQueryClient();
-        const queryKey = ["tasks", list];
-        queryClient.setQueryData<TaskViewModel[]>(queryKey, (oldTasks) => {
-        if (!oldTasks) return oldTasks;
+    function handleDragEnd(event: Parameters<DragEndEvent>[0]) {
+        if (
+            event.canceled ||
+            sort.field !== "default" ||
+            !isSortableOperation(event.operation)
+        ) return;
 
-        const oldIndex = oldTasks.findIndex((task) => task.id === source.id);
-        const newIndex = oldTasks.findIndex((task) => task.id === target.id);
+        const { source } = event.operation;
 
-        if (oldIndex === -1 || newIndex === -1) return oldTasks;
+        if (!source) return;
 
-        return arrayMove(oldTasks, oldIndex, newIndex).map((task, index) => ({
-            ...task,
-            order: index,
-        }));
+        const taskId = String(source.id);
+        const sourceIndex = source.initialIndex;
+        const targetIndex = source.index;
+
+        if (sourceIndex === targetIndex) return;
+
+        const reorderedTasks = arrayMove(tasks, sourceIndex, targetIndex);
+        const previousTask = reorderedTasks[targetIndex - 1];
+        const nextTask = reorderedTasks[targetIndex + 1];
+        const lexoRank = LexoRank.between(
+            previousTask?.lexoRank,
+            nextTask?.lexoRank
+        );
+
+        reorderTaskMutation.mutate({
+            taskId,
+            sourceIndex,
+            targetIndex,
+            lexoRank,
         });
-    }*/
+    }
 
     function Sortable({ item, index }: SortableProps) {
         const [element, setElement] = useState<Element | null>(null);
@@ -154,7 +171,6 @@ const TaskList = ({ list }: Props) => {
         });*/
 
         return (
-            <div>
             <div ref={setElement} data-shadow={isDragging || undefined}>
                 <TaskCard
                     completed={item.completed}
@@ -192,7 +208,6 @@ const TaskList = ({ list }: Props) => {
                         </button> : <div/>}
                     </div>
                 </TaskCard>
-            </div>
             </div>
         );
     }
@@ -281,11 +296,30 @@ const TaskList = ({ list }: Props) => {
                         />
                     </div>
 
-                    {sortedTasks.map((item, index) => (
-                        <motion.div key={item.clientId ?? item.id} layout transition={{ duration: 0.2 }}>
-                            <Sortable key={item.id} item={item} index={index} />
-                        </motion.div>
-                    ))}
+                    {reorderTaskMutation.isError && (
+                        <div role="alert" className="alert alert-error">
+                            <span>
+                                The task could not be moved. Its previous position has been restored.
+                            </span>
+                            <button
+                                type="button"
+                                className="btn btn-sm"
+                                onClick={() => reorderTaskMutation.reset()}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    )}
+
+                    <DragDropProvider onDragEnd={handleDragEnd}>
+                        {sortedTasks.map((item, index) => (
+                            <Sortable
+                                key={item.clientId ?? item.id}
+                                item={item}
+                                index={index}
+                            />
+                        ))}
+                    </DragDropProvider>
 
                     {/*<ul className="list">
                         {items.map((id, index) =>
